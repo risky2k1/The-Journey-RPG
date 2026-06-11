@@ -124,13 +124,13 @@ Có một trận chiến tự động chạy liên tục.
 
 ### Công việc
 
-- [ ] Spawn 1 hero.
-- [ ] Spawn 1 loại quái.
-- [ ] Hero tự tìm mục tiêu.
-- [ ] Hero tự đánh.
-- [ ] Quái mất máu và chết.
-- [ ] Quái respawn.
-- [ ] Hiển thị HP hoặc phản hồi hit đủ để debug.
+- [x] Spawn 1 hero.
+- [x] Spawn 1 loại quái.
+- [x] Hero tự tìm mục tiêu.
+- [x] Hero tự đánh.
+- [x] Quái mất máu và chết.
+- [x] Quái respawn.
+- [x] Hiển thị HP hoặc phản hồi hit đủ để debug.
 
 ### Kết quả mong đợi
 
@@ -214,7 +214,7 @@ Cho người chơi mở túi đồ, xem item, equip item mà vẫn thấy battle
 - [x] Tạo `PanelHost`.
 - [x] Tạo `InventoryPanel`.
 - [x] Mở panel từ cạnh phải hoặc theo layout đã chốt ở [UI_FLOW.md](/home/tuanpm1/Dev/common/game-rpg/docs/UI_FLOW.md:1).
-- [ ] Giữ battle tiếp tục chạy khi panel mở.
+- [x] Giữ battle tiếp tục chạy khi panel mở.
 - [ ] Equip item cho hero.
 - [ ] Cập nhật stat hero sau khi equip.
 
@@ -333,7 +333,7 @@ Các hướng mở rộng:
 
 ### Milestone B
 
-- [ ] Hero và quái đánh nhau ổn.
+- [x] Hero và quái đánh nhau ổn.
 
 ### Milestone C
 
