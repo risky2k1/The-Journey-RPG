@@ -19,7 +19,7 @@ func configure(data: ItemData) -> void:
 	item_label.text = data.display_name
 	base_position = position
 
-	var rarity_color := _color_for_rarity(data.rarity)
+	var rarity_color: Color = _color_for_rarity(data.rarity)
 	outer.color = rarity_color
 	beam.color = Color(rarity_color.r, rarity_color.g, rarity_color.b, 0.45)
 

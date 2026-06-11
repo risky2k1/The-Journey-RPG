@@ -45,9 +45,11 @@ func configure(config: Dictionary) -> void:
 	if team == &"hero":
 		body.color = Color(0.36, 0.8, 0.55, 1.0)
 		hp_bar_fill.color = Color(0.2, 0.85, 0.25, 1.0)
+		name_label.modulate = Color(0.9, 1.0, 0.92, 1.0)
 	else:
 		body.color = Color(0.86, 0.35, 0.36, 1.0)
 		hp_bar_fill.color = Color(0.92, 0.48, 0.22, 1.0)
+		name_label.modulate = Color(1.0, 0.93, 0.92, 1.0)
 
 	name_label.text = display_name
 	_update_hp_bar()
@@ -111,8 +113,8 @@ func apply_stat_bonus(stat_bonus: Dictionary) -> void:
 
 
 func _update_hp_bar() -> void:
-	var ratio := 0.0 if max_hp <= 0 else current_hp / float(max_hp)
+	var ratio: float = 0.0 if max_hp <= 0 else current_hp / float(max_hp)
 	hp_bar_fill.size.x = 56.0 * ratio
-	hp_bar_fill.position.x = -28.0
-	hp_bar_background.size.x = 56.0
-	hp_bar_background.position.x = -28.0
+	hp_bar_fill.position.x = -34.0
+	hp_bar_background.size.x = 68.0
+	hp_bar_background.position.x = -34.0

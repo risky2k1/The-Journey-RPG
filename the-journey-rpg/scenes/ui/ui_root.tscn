@@ -21,50 +21,57 @@ mouse_filter = 2
 [node name="TopBar" type="PanelContainer" parent="HUD"]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 320.0
-offset_bottom = 60.0
+offset_right = 660.0
+offset_bottom = 52.0
 
 [node name="TopBarLabel" type="Label" parent="HUD/TopBar"]
 layout_mode = 2
-text = "Stage 1  |  Kills 0/20  |  Coin 0"
+theme_override_font_sizes/font_size = 14
+text = "Lv 1  |  EXP 0/10  |  Coin 0  |  Stage 1"
 
 [node name="QuickButtons" type="HBoxContainer" parent="HUD"]
 offset_left = 16.0
-offset_top = 72.0
-offset_right = 400.0
-offset_bottom = 112.0
+offset_top = 62.0
+offset_right = 472.0
+offset_bottom = 100.0
+theme_override_constants/separation = 8
 
 [node name="InventoryButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
+custom_minimum_size = Vector2(88, 0)
 text = "Inventory"
 
 [node name="CharacterButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
+custom_minimum_size = Vector2(88, 0)
 text = "Character"
 
 [node name="TeamButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
+custom_minimum_size = Vector2(72, 0)
 text = "Team"
 
 [node name="SettingsButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
+custom_minimum_size = Vector2(84, 0)
 text = "Settings"
 
 [node name="LootFeed" type="PanelContainer" parent="HUD"]
 offset_left = 16.0
-offset_top = 120.0
-offset_right = 280.0
-offset_bottom = 176.0
+offset_top = 112.0
+offset_right = 340.0
+offset_bottom = 168.0
 
 [node name="LootFeedLabel" type="Label" parent="HUD/LootFeed"]
 layout_mode = 2
-text = "Latest loot: -"
+theme_override_font_sizes/font_size = 13
+text = "Latest event"
 
 [node name="PanelHost" type="MarginContainer" parent="HUD"]
-offset_left = 920.0
+offset_left = 948.0
 offset_top = 16.0
-offset_right = 1264.0
-offset_bottom = 304.0
+offset_right = 1248.0
+offset_bottom = 300.0
 
 [node name="PanelStack" type="TabContainer" parent="HUD/PanelHost"]
 layout_mode = 2

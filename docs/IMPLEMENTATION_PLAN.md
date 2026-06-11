@@ -263,15 +263,15 @@ Giữ được tiến trình giữa các lần mở game.
 
 ### Công việc
 
-- [ ] Tạo `SaveData`.
-- [ ] Serialize ra JSON.
-- [ ] Load lại stage hiện tại.
-- [ ] Load lại currency.
-- [ ] Load lại inventory.
-- [ ] Load lại item đang equip.
-- [ ] Load lại level.
-- [ ] Load lại số slot đã mở.
-- [ ] Thêm auto-save theo timer hoặc theo mốc.
+- [x] Tạo `SaveData`.
+- [x] Serialize ra JSON.
+- [x] Load lại stage hiện tại.
+- [x] Load lại currency.
+- [x] Load lại inventory.
+- [x] Load lại item đang equip.
+- [x] Load lại level.
+- [x] Load lại số slot đã mở.
+- [x] Thêm auto-save theo timer hoặc theo mốc.
 
 ### Kết quả mong đợi
 
@@ -291,15 +291,15 @@ Biến prototype từ “chạy được” thành “dễ nhìn, dễ hiểu”
 
 ### Công việc
 
-- [ ] Tinh chỉnh kích thước unit.
-- [ ] Tinh chỉnh spacing battlefield.
-- [ ] Tinh chỉnh màu loot.
-- [ ] Tinh chỉnh beam hoặc highlight rarity.
-- [ ] Giảm visual noise.
-- [ ] Tinh chỉnh panel width để vẫn thấy battle.
-- [ ] Kiểm tra tempo quái chết có đủ đều không.
-- [ ] Kiểm tra tempo loot có đủ xuất hiện không.
-- [ ] Kiểm tra tempo boss có đủ nổi bật không.
+- [x] Tinh chỉnh kích thước unit.
+- [x] Tinh chỉnh spacing battlefield.
+- [x] Tinh chỉnh màu loot.
+- [x] Tinh chỉnh beam hoặc highlight rarity.
+- [x] Giảm visual noise.
+- [x] Tinh chỉnh panel width để vẫn thấy battle.
+- [x] Kiểm tra tempo quái chết có đủ đều không.
+- [x] Kiểm tra tempo loot có đủ xuất hiện không.
+- [x] Kiểm tra tempo boss có đủ nổi bật không.
 
 ### Kết quả mong đợi
 
@@ -329,7 +329,7 @@ Các hướng mở rộng:
 
 ### Milestone A
 
-- [ ] Window + battlefield nhìn được.
+- [x] Window + battlefield nhìn được.
 
 ### Milestone B
 
@@ -345,11 +345,11 @@ Các hướng mở rộng:
 
 ### Milestone E
 
-- [ ] Inventory mở ra nhưng vẫn thấy battle.
+- [x] Inventory mở ra nhưng vẫn thấy battle.
 
 ### Milestone F
 
-- [ ] Save/load ổn định.
+- [x] Save/load ổn định.
 
 Nếu milestone nào chưa đạt, không nên nhảy sang quá nhiều tính năng mới.
 

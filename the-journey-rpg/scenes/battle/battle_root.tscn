@@ -6,11 +6,53 @@
 script = ExtResource("1_1h8h0")
 
 [node name="BackgroundLayer" type="ColorRect" parent="."]
-offset_left = 0.0
-offset_top = 96.0
-offset_right = 1280.0
-offset_bottom = 320.0
-color = Color(0.121569, 0.156863, 0.133333, 0.85)
+offset_left = 8.0
+offset_top = 108.0
+offset_right = 1272.0
+offset_bottom = 314.0
+color = Color(0.1, 0.125, 0.11, 0.92)
+
+[node name="BattlefieldInset" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 132.0
+offset_right = 900.0
+offset_bottom = 294.0
+color = Color(0.145, 0.18, 0.15, 0.98)
+
+[node name="LeftGlow" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 132.0
+offset_right = 240.0
+offset_bottom = 294.0
+color = Color(0.19, 0.28, 0.22, 0.35)
+
+[node name="RightGlow" type="ColorRect" parent="."]
+offset_left = 684.0
+offset_top = 132.0
+offset_right = 900.0
+offset_bottom = 294.0
+color = Color(0.22, 0.16, 0.16, 0.28)
+
+[node name="CenterLane" type="ColorRect" parent="."]
+offset_left = 412.0
+offset_top = 146.0
+offset_right = 516.0
+offset_bottom = 280.0
+color = Color(0.2, 0.26, 0.22, 0.22)
+
+[node name="LaneTop" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 172.0
+offset_right = 900.0
+offset_bottom = 174.0
+color = Color(0.75, 0.85, 0.76, 0.08)
+
+[node name="LaneBottom" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 246.0
+offset_right = 900.0
+offset_bottom = 248.0
+color = Color(0.75, 0.85, 0.76, 0.08)
 
 [node name="UnitLayer" type="Node2D" parent="."]
 y_sort_enabled = true

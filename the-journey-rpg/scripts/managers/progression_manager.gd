@@ -41,6 +41,28 @@ func get_summary() -> Dictionary:
 	return _build_summary()
 
 
+func export_state() -> Dictionary:
+	return {
+		"profile_level": state.profile_level,
+		"current_exp": state.current_exp,
+		"exp_to_next": state.exp_to_next,
+		"currency": state.currency,
+		"unlocked_team_slot_count": state.unlocked_team_slot_count,
+	}
+
+
+func apply_state(snapshot: Dictionary) -> void:
+	if snapshot.is_empty():
+		return
+
+	state.profile_level = int(snapshot.get("profile_level", 1))
+	state.current_exp = int(snapshot.get("current_exp", 0))
+	state.exp_to_next = int(snapshot.get("exp_to_next", _exp_requirement_for_level(state.profile_level)))
+	state.currency = int(snapshot.get("currency", 0))
+	state.unlocked_team_slot_count = int(snapshot.get("unlocked_team_slot_count", _slot_count_for_level(state.profile_level)))
+	_emit_progression_changed()
+
+
 func _exp_requirement_for_level(level: int) -> int:
 	return 10 + ((level - 1) * 6)
 

@@ -21,10 +21,10 @@ var hero_unit: BattleUnit
 var enemy_units: Array[BattleUnit] = []
 var enemy_respawn_queue: Array[float] = []
 var hero_respawn_timer: float = 0.0
-var hero_spawn_position := Vector2(180.0, 244.0)
-var enemy_spawn_position := Vector2(760.0, 170.0)
-var battlefield_left_limit := 150.0
-var battlefield_right_limit := 820.0
+var hero_spawn_position := Vector2(240.0, 228.0)
+var enemy_spawn_position := Vector2(700.0, 194.0)
+var battlefield_left_limit := 120.0
+var battlefield_right_limit := 800.0
 var current_stage_number: int = 1
 var loot_manager: LootManager
 var progression_manager: ProgressionManager
@@ -193,15 +193,8 @@ func _emit_status() -> void:
 		if is_instance_valid(enemy) and enemy.is_alive():
 			alive_enemy_count += 1
 
-	var boss_text := "Boss up" if battle_state.boss_spawned else "Boss pending"
-	var status_text := "Stage %d  |  Kills %d/%d  |  %s  |  HP %s  |  Enemies %d" % [
-		current_stage_number,
-		battle_state.kill_count,
-		battle_state.kill_target,
-		boss_text,
-		hero_hp_text,
-		alive_enemy_count
-	]
+	var boss_text: String = "Boss active" if battle_state.boss_spawned else "Boss soon"
+	var status_text := "Stage %d  |  Kills %d/%d  |  %s  |  HP %s  |  Foes %d" % [current_stage_number, battle_state.kill_count, battle_state.kill_target, boss_text, hero_hp_text, alive_enemy_count]
 	battle_status_changed.emit(status_text)
 
 
@@ -209,7 +202,7 @@ func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 	if loot_manager != null:
 		loot_manager.roll_loot_for_enemy(enemy.unit_id, enemy.global_position + Vector2(0.0, -18.0))
 	if progression_manager != null:
-		var reward := _reward_for_enemy(enemy.unit_id)
+		var reward: Dictionary = _reward_for_enemy(enemy.unit_id)
 		progression_manager.grant_rewards(reward["exp"], reward["coin"])
 
 	if enemy.unit_id == BossDataResource.id:
@@ -283,3 +276,42 @@ func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
 		"exp": EnemyDataResource.reward_exp,
 		"coin": EnemyDataResource.reward_coin,
 	}
+
+
+func export_state() -> Dictionary:
+	return {
+		"current_stage_number": current_stage_number,
+		"kill_count": battle_state.kill_count,
+		"kill_target": battle_state.kill_target,
+		"boss_spawned": battle_state.boss_spawned,
+		"boss_defeated": battle_state.boss_defeated,
+	}
+
+
+func apply_state(snapshot: Dictionary) -> void:
+	if snapshot.is_empty():
+		return
+
+	current_stage_number = int(snapshot.get("current_stage_number", 1))
+	battle_state.kill_count = int(snapshot.get("kill_count", 0))
+	battle_state.kill_target = int(snapshot.get("kill_target", 20))
+	battle_state.boss_spawned = bool(snapshot.get("boss_spawned", false))
+	battle_state.boss_defeated = bool(snapshot.get("boss_defeated", false))
+
+	_clear_enemies()
+	enemy_respawn_queue.clear()
+
+	if battle_state.boss_spawned and not battle_state.boss_defeated:
+		_spawn_boss()
+	else:
+		_spawn_enemy()
+
+	_emit_event("Save loaded")
+	_emit_status()
+
+
+func _clear_enemies() -> void:
+	for enemy in enemy_units:
+		if is_instance_valid(enemy):
+			enemy.queue_free()
+	enemy_units.clear()
