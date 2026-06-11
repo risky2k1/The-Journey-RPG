@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_jg7wl"]
+
+[resource]
+script = ExtResource("1_jg7wl")
+id = &"item_patched_armor"
+display_name = "Patched Armor"
+slot_type = &"armor"
+rarity = &"common"
+icon_id = &"item_patched_armor_icon"
+stat_profile = {
+"hp": 12
+}
+drop_weight = 70

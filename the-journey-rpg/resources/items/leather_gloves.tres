@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_8v0eh"]
+
+[resource]
+script = ExtResource("1_8v0eh")
+id = &"item_leather_gloves"
+display_name = "Leather Gloves"
+slot_type = &"gloves"
+rarity = &"common"
+icon_id = &"item_leather_gloves_icon"
+stat_profile = {
+"attack": 1
+}
+drop_weight = 65

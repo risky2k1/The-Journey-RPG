@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_hq6yx"]
+
+[resource]
+script = ExtResource("1_hq6yx")
+id = &"item_copper_charm"
+display_name = "Copper Charm"
+slot_type = &"necklace"
+rarity = &"uncommon"
+icon_id = &"item_copper_charm_icon"
+stat_profile = {
+"hp": 8,
+"attack": 1
+}
+drop_weight = 35

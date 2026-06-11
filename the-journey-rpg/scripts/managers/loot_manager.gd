@@ -4,6 +4,11 @@ class_name LootManager
 
 const RustySwordData := preload("res://resources/items/rusty_sword.tres")
 const GreenRingData := preload("res://resources/items/green_ring.tres")
+const WornBucklerData := preload("res://resources/items/worn_buckler.tres")
+const PatchedArmorData := preload("res://resources/items/patched_armor.tres")
+const LeatherGlovesData := preload("res://resources/items/leather_gloves.tres")
+const TrailBootsData := preload("res://resources/items/trail_boots.tres")
+const CopperCharmData := preload("res://resources/items/copper_charm.tres")
 const EQUIPMENT_SLOTS: Array[StringName] = [
 	&"weapon",
 	&"offhand",
@@ -75,13 +80,26 @@ func _roll_item(enemy_id: StringName) -> ItemData:
 
 
 func _roll_weighted_item() -> ItemData:
-	var total_weight: int = RustySwordData.drop_weight + GreenRingData.drop_weight
+	var item_pool: Array[ItemData] = [
+		RustySwordData,
+		WornBucklerData,
+		PatchedArmorData,
+		LeatherGlovesData,
+		TrailBootsData,
+		GreenRingData,
+		CopperCharmData,
+	]
+	var total_weight: int = 0
+	for item_data in item_pool:
+		total_weight += item_data.drop_weight
+
 	var roll: int = randi_range(1, total_weight)
-
-	if roll <= RustySwordData.drop_weight:
-		return RustySwordData
-
-	return GreenRingData
+	var cursor: int = 0
+	for item_data in item_pool:
+		cursor += item_data.drop_weight
+		if roll <= cursor:
+			return item_data
+	return RustySwordData
 
 
 func _build_inventory_text() -> String:
@@ -279,10 +297,20 @@ func apply_state(snapshot: Dictionary) -> void:
 
 func _item_from_id(item_id: StringName) -> ItemData:
 	match item_id:
+		&"item_copper_charm":
+			return CopperCharmData
 		&"item_green_ring":
 			return GreenRingData
+		&"item_leather_gloves":
+			return LeatherGlovesData
+		&"item_patched_armor":
+			return PatchedArmorData
 		&"item_rusty_sword":
 			return RustySwordData
+		&"item_trail_boots":
+			return TrailBootsData
+		&"item_worn_buckler":
+			return WornBucklerData
 		_:
 			return null
 

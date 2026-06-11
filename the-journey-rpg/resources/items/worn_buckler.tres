@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_4n8ho"]
+
+[resource]
+script = ExtResource("1_4n8ho")
+id = &"item_worn_buckler"
+display_name = "Worn Buckler"
+slot_type = &"offhand"
+rarity = &"common"
+icon_id = &"item_worn_buckler_icon"
+stat_profile = {
+"hp": 6
+}
+drop_weight = 80
