@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_data.gd" id="1_trkr8"]
+
+[resource]
+script = ExtResource("1_trkr8")
+id = &"enemy_slime_king"
+display_name = "Slime King"
+enemy_type = &"boss"
+base_hp = 220
+base_attack = 8
+base_attack_speed = 0.9
+base_move_speed = 54.0
+attack_range = 36.0
+reward_exp = 20
+reward_coin = 10
+loot_table_id = &"slime_boss"
+sprite_id = &"enemy_slime_king_sprite"
+is_boss = true

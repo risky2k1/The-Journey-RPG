@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_data.gd" id="1_s13n6"]
+
+[resource]
+script = ExtResource("1_s13n6")
+id = &"enemy_slime"
+display_name = "Slime"
+enemy_type = &"normal"
+base_hp = 28
+base_attack = 3
+base_attack_speed = 0.8
+base_move_speed = 60.0
+attack_range = 28.0
+reward_exp = 2
+reward_coin = 1
+loot_table_id = &"slime_basic"
+sprite_id = &"enemy_slime_sprite"
+is_boss = false

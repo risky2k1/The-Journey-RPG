@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://du4lt6ow7wfmb"]
+
+[node name="CharacterPanel" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+text = "Character"
+
+[node name="Body" type="RichTextLabel" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Hero stats, level and equipment summary."

@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cj8k6uygsh4ud"]
+
+[node name="InventoryPanel" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+text = "Inventory"
+
+[node name="Body" type="RichTextLabel" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Inventory items will appear here while battle remains visible."

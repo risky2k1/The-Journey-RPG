@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://cg7m263xpi8wb"]
+
+[ext_resource type="Script" path="res://scripts/app/data_registry.gd" id="1_12jwv"]
+[ext_resource type="Script" path="res://scripts/app/game_controller.gd" id="2_qpkh0"]
+[ext_resource type="Script" path="res://scripts/app/save_manager.gd" id="3_x6f1q"]
+[ext_resource type="PackedScene" path="res://scenes/main/window_root.tscn" id="4_kw64v"]
+
+[node name="Main" type="Node"]
+
+[node name="AppRoot" type="Node" parent="."]
+
+[node name="GameController" type="Node" parent="AppRoot"]
+script = ExtResource("2_qpkh0")
+
+[node name="SaveManager" type="Node" parent="AppRoot"]
+script = ExtResource("3_x6f1q")
+
+[node name="DataRegistry" type="Node" parent="AppRoot"]
+script = ExtResource("1_12jwv")
+
+[node name="WindowRoot" parent="." instance=ExtResource("4_kw64v")]

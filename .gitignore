@@ -1,0 +1,15 @@
+.agents
+
+# Godot project cache and local editor state
+.godot/
+the-journey-rpg/.godot/
+the-journey-rpg/.import/
+
+# Godot exports and local saves
+the-journey-rpg/export_presets.cfg
+the-journey-rpg/*.translation
+the-journey-rpg/saves/
+
+# OS noise
+.DS_Store
+Thumbs.db

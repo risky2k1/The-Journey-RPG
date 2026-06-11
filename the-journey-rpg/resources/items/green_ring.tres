@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1_re1y6"]
+
+[resource]
+script = ExtResource("1_re1y6")
+id = &"item_green_ring"
+display_name = "Green Ring"
+slot_type = &"accessory"
+rarity = &"uncommon"
+icon_id = &"item_green_ring_icon"
+stat_profile = {
+"hp": 10,
+"loot_find": 1
+}
+drop_weight = 40

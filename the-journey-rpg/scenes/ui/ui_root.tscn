@@ -1,0 +1,81 @@
+[gd_scene load_steps=6 format=3 uid="uid://dv4no8s8f5s6q"]
+
+[ext_resource type="Script" path="res://scripts/managers/ui_manager.gd" id="1_j37k3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/inventory_panel.tscn" id="2_qeuo1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/character_panel.tscn" id="3_2qhwu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/team_panel.tscn" id="4_dj1ea"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/settings_panel.tscn" id="5_l481x"]
+
+[node name="UIRoot" type="CanvasLayer"]
+script = ExtResource("1_j37k3")
+
+[node name="HUD" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" type="PanelContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 320.0
+offset_bottom = 60.0
+
+[node name="TopBarLabel" type="Label" parent="HUD/TopBar"]
+layout_mode = 2
+text = "Stage 1  |  Kills 0/20  |  Coin 0"
+
+[node name="QuickButtons" type="HBoxContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 72.0
+offset_right = 400.0
+offset_bottom = 112.0
+
+[node name="InventoryButton" type="Button" parent="HUD/QuickButtons"]
+layout_mode = 2
+text = "Inventory"
+
+[node name="CharacterButton" type="Button" parent="HUD/QuickButtons"]
+layout_mode = 2
+text = "Character"
+
+[node name="TeamButton" type="Button" parent="HUD/QuickButtons"]
+layout_mode = 2
+text = "Team"
+
+[node name="SettingsButton" type="Button" parent="HUD/QuickButtons"]
+layout_mode = 2
+text = "Settings"
+
+[node name="LootFeed" type="PanelContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 120.0
+offset_right = 280.0
+offset_bottom = 176.0
+
+[node name="LootFeedLabel" type="Label" parent="HUD/LootFeed"]
+layout_mode = 2
+text = "Latest loot: -"
+
+[node name="PanelHost" type="MarginContainer" parent="HUD"]
+offset_left = 920.0
+offset_top = 16.0
+offset_right = 1264.0
+offset_bottom = 304.0
+
+[node name="PanelStack" type="TabContainer" parent="HUD/PanelHost"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="InventoryPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("2_qeuo1")]
+
+[node name="CharacterPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("3_2qhwu")]
+
+[node name="TeamPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("4_dj1ea")]
+
+[node name="SettingsPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("5_l481x")]
