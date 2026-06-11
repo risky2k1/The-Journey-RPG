@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_data.gd" id="1_f1h2b"]
+
+[resource]
+script = ExtResource("1_f1h2b")
+id = &"enemy_needle_bat"
+display_name = "Needle Bat"
+enemy_type = &"normal"
+base_hp = 18
+base_attack = 2
+base_attack_speed = 1.2
+base_move_speed = 88.0
+attack_range = 32.0
+reward_exp = 3
+reward_coin = 2
+loot_table_id = &"slime_basic"
+sprite_id = &"enemy_needle_bat_sprite"
+is_boss = false
+target_rule = &"back_row_first"

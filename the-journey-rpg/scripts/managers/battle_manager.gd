@@ -7,8 +7,12 @@ const BattleStateScript := preload("res://scripts/state/battle_state.gd")
 const LootDropScene := preload("res://scenes/battle/loot_drop.tscn")
 const HeroDataResource := preload("res://resources/heroes/adventurer.tres")
 const SecondHeroDataResource := preload("res://resources/heroes/apprentice.tres")
-const EnemyDataResource := preload("res://resources/enemies/slime.tres")
+const SlimeEnemyDataResource := preload("res://resources/enemies/slime.tres")
+const NeedleBatEnemyDataResource := preload("res://resources/enemies/needle_bat.tres")
 const BossDataResource := preload("res://resources/enemies/slime_king.tres")
+const TARGET_RULE_FRONT_FIRST := &"front_first"
+const TARGET_RULE_LOWEST_HP := &"lowest_hp"
+const TARGET_RULE_BACK_ROW_FIRST := &"back_row_first"
 
 signal battle_bootstrapped
 signal battle_status_changed(status_text: String)
@@ -23,6 +27,7 @@ var enemy_units: Array[BattleUnit] = []
 var enemy_respawn_queue: Array[float] = []
 var hero_respawn_timers: Dictionary = {}
 var hero_units_by_id: Dictionary = {}
+var enemy_data_by_instance_id: Dictionary = {}
 var formation_positions_by_slot: Dictionary = {
 	0: Vector2(332.0, 188.0),
 	1: Vector2(332.0, 220.0),
@@ -41,6 +46,7 @@ var current_stage_number: int = 1
 var loot_manager: LootManager
 var progression_manager: ProgressionManager
 var team_manager: TeamManager
+var normal_enemy_spawn_count: int = 0
 
 
 func _ready() -> void:
@@ -98,7 +104,7 @@ func _spawn_hero_for_entry(formation_entry: Dictionary) -> void:
 
 
 func _spawn_enemy() -> void:
-	_spawn_enemy_from_data(EnemyDataResource, false)
+	_spawn_enemy_from_data(_next_normal_enemy_data(), false)
 
 
 func _spawn_boss() -> void:
@@ -126,6 +132,7 @@ func _spawn_enemy_from_data(data: EnemyData, is_boss: bool) -> void:
 		enemy.global_position = enemy_spawn_position + Vector2(0.0, -8.0)
 		enemy.set_state_text("Boss")
 	enemy_units.append(enemy)
+	enemy_data_by_instance_id[enemy.get_instance_id()] = data
 
 
 func _tick_respawns(delta: float) -> void:
@@ -186,7 +193,7 @@ func _process_enemies(delta: float) -> void:
 			continue
 		if not enemy.is_alive():
 			continue
-		var hero_target: BattleUnit = _get_priority_target_hero(enemy.global_position)
+		var hero_target: BattleUnit = _get_priority_target_hero(enemy)
 		if hero_target == null:
 			enemy.set_state_text("Waiting")
 			continue
@@ -226,8 +233,17 @@ func _get_closest_alive_enemy(source_position: Vector2) -> BattleUnit:
 	return closest_enemy
 
 
-func _get_priority_target_hero(source_position: Vector2) -> BattleUnit:
-	for target_row in range(3):
+func _get_priority_target_hero(enemy: BattleUnit) -> BattleUnit:
+	var target_rule: StringName = _enemy_target_rule(enemy)
+	if target_rule == TARGET_RULE_LOWEST_HP:
+		return _get_lowest_hp_alive_hero(enemy.global_position)
+	if target_rule == TARGET_RULE_BACK_ROW_FIRST:
+		return _get_priority_target_hero_by_rows(enemy.global_position, [2, 1, 0])
+	return _get_priority_target_hero_by_rows(enemy.global_position, [0, 1, 2])
+
+
+func _get_priority_target_hero_by_rows(source_position: Vector2, row_priority: Array[int]) -> BattleUnit:
+	for target_row in row_priority:
 		var closest_hero: BattleUnit
 		var closest_distance: float = INF
 		for hero_unit in hero_units:
@@ -241,8 +257,27 @@ func _get_priority_target_hero(source_position: Vector2) -> BattleUnit:
 				closest_hero = hero_unit
 		if closest_hero != null:
 			return closest_hero
-
 	return null
+
+
+func _get_lowest_hp_alive_hero(source_position: Vector2) -> BattleUnit:
+	var lowest_hp_hero: BattleUnit
+	var lowest_hp_value: float = INF
+	var closest_distance: float = INF
+	for hero_unit in hero_units:
+		if not is_instance_valid(hero_unit) or not hero_unit.is_alive():
+			continue
+		var hero_hp: float = hero_unit.current_hp
+		var distance: float = source_position.distance_to(hero_unit.global_position)
+		if hero_hp < lowest_hp_value:
+			lowest_hp_value = hero_hp
+			closest_distance = distance
+			lowest_hp_hero = hero_unit
+			continue
+		if is_equal_approx(hero_hp, lowest_hp_value) and distance < closest_distance:
+			closest_distance = distance
+			lowest_hp_hero = hero_unit
+	return lowest_hp_hero
 
 
 func _get_closest_alive_hero(source_position: Vector2) -> BattleUnit:
@@ -287,7 +322,9 @@ func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 		var reward: Dictionary = _reward_for_enemy(enemy.unit_id)
 		progression_manager.grant_rewards(reward["exp"], reward["coin"])
 
-	if enemy.unit_id == BossDataResource.id:
+	var enemy_data: EnemyData = _enemy_data_for_unit(enemy)
+	enemy_data_by_instance_id.erase(enemy.get_instance_id())
+	if enemy_data != null and enemy_data.is_boss:
 		battle_state.boss_defeated = true
 		_complete_stage()
 		return
@@ -349,15 +386,15 @@ func _apply_equipment_to_heroes(_hero_bonus_by_id: Dictionary, _hero_summary_by_
 
 
 func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
-	if enemy_id == BossDataResource.id:
+	var enemy_data: EnemyData = _enemy_data_for_id(enemy_id)
+	if enemy_data != null:
 		return {
-			"exp": BossDataResource.reward_exp,
-			"coin": BossDataResource.reward_coin,
+			"exp": enemy_data.reward_exp,
+			"coin": enemy_data.reward_coin,
 		}
-
 	return {
-		"exp": EnemyDataResource.reward_exp,
-		"coin": EnemyDataResource.reward_coin,
+		"exp": SlimeEnemyDataResource.reward_exp,
+		"coin": SlimeEnemyDataResource.reward_coin,
 	}
 
 
@@ -399,6 +436,7 @@ func _clear_enemies() -> void:
 		if is_instance_valid(enemy):
 			enemy.queue_free()
 	enemy_units.clear()
+	enemy_data_by_instance_id.clear()
 
 
 func _on_team_changed(_summary: Dictionary) -> void:
@@ -444,6 +482,37 @@ func _hero_data_for_id(hero_id: StringName) -> HeroData:
 			return SecondHeroDataResource
 		_:
 			return HeroDataResource
+
+
+func _next_normal_enemy_data() -> EnemyData:
+	var enemy_data: EnemyData = SlimeEnemyDataResource
+	if normal_enemy_spawn_count % 3 == 2:
+		enemy_data = NeedleBatEnemyDataResource
+	normal_enemy_spawn_count += 1
+	return enemy_data
+
+
+func _enemy_data_for_id(enemy_id: StringName) -> EnemyData:
+	match enemy_id:
+		NeedleBatEnemyDataResource.id:
+			return NeedleBatEnemyDataResource
+		BossDataResource.id:
+			return BossDataResource
+		_:
+			return SlimeEnemyDataResource
+
+
+func _enemy_data_for_unit(enemy: BattleUnit) -> EnemyData:
+	if enemy == null:
+		return null
+	return enemy_data_by_instance_id.get(enemy.get_instance_id()) as EnemyData
+
+
+func _enemy_target_rule(enemy: BattleUnit) -> StringName:
+	var enemy_data: EnemyData = _enemy_data_for_unit(enemy)
+	if enemy_data == null:
+		return TARGET_RULE_FRONT_FIRST
+	return StringName(enemy_data.target_rule)
 
 
 func _hero_spawn_position(slot_index: int) -> Vector2:

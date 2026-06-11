@@ -108,7 +108,7 @@ func get_summary() -> Dictionary:
 		else:
 			active_lines.append("%s: Unassigned" % _hero_name(hero_id))
 
-	var body_text: String = "Formation Rules\nEnemies hit Front row first, then Middle, then Back.\nThis establishes the default targeting rule for future enemy AI.\n\nActive Heroes\n%s" % [
+	var body_text: String = "Formation Rules\nDefault enemies hit Front row first, then Middle, then Back.\nSpecial enemies can override this and hunt the Back row or the lowest-HP hero.\n\nActive Heroes\n%s" % [
 		"\n".join(active_lines) if not active_lines.is_empty() else "No active heroes",
 	]
 

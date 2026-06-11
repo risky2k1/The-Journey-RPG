@@ -15,3 +15,4 @@ class_name EnemyData
 @export var loot_table_id: StringName
 @export var sprite_id: StringName
 @export var is_boss: bool = false
+@export var target_rule: StringName = &"front_first"

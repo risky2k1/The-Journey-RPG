@@ -149,6 +149,16 @@ func _apply_enemy_visuals() -> void:
 		hp_bar_fill.color = Color(0.98, 0.46, 0.82, 1.0)
 		name_label.modulate = Color(1.0, 0.9, 1.0, 1.0)
 		return
+	if unit_id == &"enemy_needle_bat":
+		scale = Vector2(0.84, 0.84)
+		body.color = Color(0.54, 0.46, 0.9, 1.0)
+		back_accent.color = Color(0.18, 0.14, 0.32, 1.0)
+		chest_accent.color = Color(0.9, 0.88, 1.0, 0.86)
+		weapon.color = Color(0.78, 0.7, 1.0, 1.0)
+		aura.color = Color(0.56, 0.52, 1.0, 0.14)
+		hp_bar_fill.color = Color(0.74, 0.62, 1.0, 1.0)
+		name_label.modulate = Color(0.95, 0.93, 1.0, 1.0)
+		return
 
 	body.color = Color(0.86, 0.35, 0.36, 1.0)
 	back_accent.color = Color(0.34, 0.12, 0.14, 1.0)
