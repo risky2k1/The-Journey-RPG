@@ -34,6 +34,7 @@ func _ready() -> void:
 	loot_manager = get_parent().get_parent().get_node_or_null("AppRoot/LootManager")
 	if loot_manager != null:
 		loot_manager.loot_dropped.connect(_spawn_loot_drop)
+		loot_manager.equipment_changed.connect(_apply_equipment_to_hero)
 	_spawn_hero()
 	_spawn_enemy()
 	_emit_event("Stage %d begins" % current_stage_number)
@@ -259,3 +260,8 @@ func _on_loot_pickup(item_data: ItemData) -> void:
 	if loot_manager != null:
 		loot_manager.register_pickup(item_data)
 	_emit_event("Picked up: %s" % item_data.display_name)
+
+
+func _apply_equipment_to_hero(total_stats: Dictionary, _summary_text: String) -> void:
+	if is_instance_valid(hero_unit):
+		hero_unit.apply_stat_bonus(total_stats)

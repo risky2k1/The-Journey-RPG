@@ -11,6 +11,11 @@ class_name BattleUnit
 var unit_id: StringName
 var team: StringName
 var display_name: String = ""
+var base_max_hp: int = 100
+var base_attack: int = 10
+var base_attack_speed: float = 1.0
+var base_move_speed: float = 80.0
+var base_attack_range: float = 48.0
 var max_hp: int = 100
 var current_hp: float = 100.0
 var attack: int = 10
@@ -25,12 +30,17 @@ func configure(config: Dictionary) -> void:
 	unit_id = config.get("unit_id", &"")
 	team = config.get("team", &"neutral")
 	display_name = config.get("display_name", "Unit")
-	max_hp = config.get("max_hp", 100)
+	base_max_hp = config.get("max_hp", 100)
+	base_attack = config.get("attack", 10)
+	base_attack_speed = max(config.get("attack_speed", 1.0), 0.1)
+	base_move_speed = config.get("move_speed", 80.0)
+	base_attack_range = config.get("attack_range", 48.0)
+	max_hp = base_max_hp
 	current_hp = max_hp
-	attack = config.get("attack", 10)
-	attack_speed = max(config.get("attack_speed", 1.0), 0.1)
-	move_speed = config.get("move_speed", 80.0)
-	attack_range = config.get("attack_range", 48.0)
+	attack = base_attack
+	attack_speed = base_attack_speed
+	move_speed = base_move_speed
+	attack_range = base_attack_range
 
 	if team == &"hero":
 		body.color = Color(0.36, 0.8, 0.55, 1.0)
@@ -84,6 +94,20 @@ func revive() -> void:
 
 func set_state_text(value: String) -> void:
 	state_label.text = value
+
+
+func apply_stat_bonus(stat_bonus: Dictionary) -> void:
+	var previous_max_hp: int = maxi(max_hp, 1)
+	var hp_ratio: float = clampf(current_hp / float(previous_max_hp), 0.0, 1.0)
+
+	max_hp = base_max_hp + int(stat_bonus.get("hp", 0))
+	attack = base_attack + int(stat_bonus.get("attack", 0))
+	attack_speed = base_attack_speed
+	move_speed = base_move_speed
+	attack_range = base_attack_range
+	current_hp = max_hp * hp_ratio if alive else current_hp
+	_update_hp_bar()
+	set_state_text("Equipped")
 
 
 func _update_hp_bar() -> void:

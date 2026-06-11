@@ -215,8 +215,8 @@ Cho người chơi mở túi đồ, xem item, equip item mà vẫn thấy battle
 - [x] Tạo `InventoryPanel`.
 - [x] Mở panel từ cạnh phải hoặc theo layout đã chốt ở [UI_FLOW.md](/home/tuanpm1/Dev/common/game-rpg/docs/UI_FLOW.md:1).
 - [x] Giữ battle tiếp tục chạy khi panel mở.
-- [ ] Equip item cho hero.
-- [ ] Cập nhật stat hero sau khi equip.
+- [x] Equip item cho hero.
+- [x] Cập nhật stat hero sau khi equip.
 
 ### Kết quả mong đợi
 
