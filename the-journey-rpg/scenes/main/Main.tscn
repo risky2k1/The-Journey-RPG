@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cg7m263xpi8wb"]
+[gd_scene load_steps=7 format=3 uid="uid://cg7m263xpi8wb"]
 
 [ext_resource type="Script" uid="uid://dda4ljxsmqxa3" path="res://scripts/app/data_registry.gd" id="1_12jwv"]
 [ext_resource type="Script" uid="uid://cote0sup6y5x4" path="res://scripts/app/game_controller.gd" id="2_qpkh0"]
 [ext_resource type="Script" uid="uid://hbjqkflmvstx" path="res://scripts/app/save_manager.gd" id="3_x6f1q"]
 [ext_resource type="PackedScene" uid="uid://d0vj32n2x0gyp" path="res://scenes/main/window_root.tscn" id="4_kw64v"]
 [ext_resource type="Script" path="res://scripts/managers/loot_manager.gd" id="5_h1teo"]
+[ext_resource type="Script" path="res://scripts/managers/progression_manager.gd" id="6_0j8ay"]
 
 [node name="Main" type="Node" unique_id=1966790259]
 
@@ -21,6 +22,9 @@ script = ExtResource("1_12jwv")
 
 [node name="LootManager" type="Node" parent="AppRoot"]
 script = ExtResource("5_h1teo")
+
+[node name="ProgressionManager" type="Node" parent="AppRoot"]
+script = ExtResource("6_0j8ay")
 
 [node name="WindowRoot" parent="." unique_id=142296568 instance=ExtResource("4_kw64v")]
 offset_left = -21.0

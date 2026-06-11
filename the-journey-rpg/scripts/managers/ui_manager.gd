@@ -12,8 +12,13 @@ class_name UIManager
 @onready var inventory_item_list: ItemList = get_node("HUD/PanelHost/PanelStack/InventoryPanel/ItemList")
 @onready var inventory_body_label: RichTextLabel = get_node("HUD/PanelHost/PanelStack/InventoryPanel/Body")
 @onready var character_body_label: RichTextLabel = get_node("HUD/PanelHost/PanelStack/CharacterPanel/Body")
+@onready var team_body_label: RichTextLabel = get_node("HUD/PanelHost/PanelStack/TeamPanel/Body")
 
 var loot_manager: LootManager
+var progression_manager: ProgressionManager
+var last_battle_status: String = "Combat idle"
+var progression_summary: Dictionary = {}
+var equipment_summary_text: String = "Equipped Weapon: None\nEquipped Accessory: None\nBonus HP: +0\nBonus Attack: +0"
 
 
 func _ready() -> void:
@@ -32,6 +37,13 @@ func _ready() -> void:
 		loot_manager.inventory_changed.connect(_update_inventory)
 	if loot_manager != null and loot_manager.has_signal("equipment_changed"):
 		loot_manager.equipment_changed.connect(_update_character_summary)
+	progression_manager = get_parent().get_parent().get_node_or_null("AppRoot/ProgressionManager")
+	if progression_manager != null and progression_manager.has_signal("progression_changed"):
+		progression_manager.progression_changed.connect(_update_progression)
+	if progression_manager != null and progression_manager.has_signal("progression_event"):
+		progression_manager.progression_event.connect(_update_event)
+	if progression_manager != null and progression_manager.has_method("get_summary"):
+		_update_progression(progression_manager.get_summary())
 
 
 func _open_inventory() -> void:
@@ -51,7 +63,8 @@ func _open_settings() -> void:
 
 
 func _update_status(status_text: String) -> void:
-	top_bar_label.text = status_text
+	last_battle_status = status_text
+	_refresh_top_bar()
 
 
 func _update_event(event_text: String) -> void:
@@ -69,7 +82,8 @@ func _update_inventory(inventory_text: String, inventory_entries: Array) -> void
 
 
 func _update_character_summary(_total_stats: Dictionary, summary_text: String) -> void:
-	character_body_label.text = summary_text
+	equipment_summary_text = summary_text
+	_refresh_character_summary()
 
 
 func _equip_inventory_item(item_index: int) -> void:
@@ -89,3 +103,29 @@ func _color_for_rarity(rarity: StringName) -> Color:
 			return Color(0.45, 0.65, 1.0, 1.0)
 		_:
 			return Color(0.9, 0.9, 0.9, 1.0)
+
+
+func _update_progression(summary: Dictionary) -> void:
+	progression_summary = summary
+	_refresh_top_bar()
+	_refresh_character_summary()
+	team_body_label.text = String(summary.get("team_progress_text", ""))
+
+
+func _refresh_top_bar() -> void:
+	var level: int = int(progression_summary.get("profile_level", 1))
+	var exp: int = int(progression_summary.get("current_exp", 0))
+	var exp_to_next: int = int(progression_summary.get("exp_to_next", 10))
+	var coin: int = int(progression_summary.get("currency", 0))
+	top_bar_label.text = "Lv %d  |  EXP %d/%d  |  Coin %d  |  %s" % [
+		level,
+		exp,
+		exp_to_next,
+		coin,
+		last_battle_status,
+	]
+
+
+func _refresh_character_summary() -> void:
+	var progress_text: String = String(progression_summary.get("character_progress_text", "Level: 1\nEXP: 0/10\nCoin: 0"))
+	character_body_label.text = "%s\n\n%s" % [progress_text, equipment_summary_text]

@@ -237,12 +237,12 @@ Thêm cảm giác mạnh lên và chuẩn bị cho fantasy party mở rộng.
 
 ### Công việc
 
-- [ ] Thêm EXP.
-- [ ] Thêm level cho hero hoặc profile.
-- [ ] Thêm currency cơ bản.
-- [ ] Thêm dữ liệu `TeamSlot`.
-- [ ] UI hiển thị slot đang khóa.
-- [ ] Thêm một rule mở slot đơn giản theo level hoặc stage milestone.
+- [x] Thêm EXP.
+- [x] Thêm level cho hero hoặc profile.
+- [x] Thêm currency cơ bản.
+- [x] Thêm dữ liệu `TeamSlot`.
+- [x] UI hiển thị slot đang khóa.
+- [x] Thêm một rule mở slot đơn giản theo level hoặc stage milestone.
 
 ### Kết quả mong đợi
 

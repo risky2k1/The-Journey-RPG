@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TeamSlotData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/team_slot_data.gd" id="1_v71q8"]
+
+[resource]
+script = ExtResource("1_v71q8")
+id = &"team_slot_0"
+slot_index = 0
+unlock_requirement_type = &"default"
+unlock_requirement_value = 1
+preferred_role = &"frontline"

@@ -27,11 +27,13 @@ var battlefield_left_limit := 150.0
 var battlefield_right_limit := 820.0
 var current_stage_number: int = 1
 var loot_manager: LootManager
+var progression_manager: ProgressionManager
 
 
 func _ready() -> void:
 	battle_state = BattleStateScript.new()
 	loot_manager = get_parent().get_parent().get_node_or_null("AppRoot/LootManager")
+	progression_manager = get_parent().get_parent().get_node_or_null("AppRoot/ProgressionManager")
 	if loot_manager != null:
 		loot_manager.loot_dropped.connect(_spawn_loot_drop)
 		loot_manager.equipment_changed.connect(_apply_equipment_to_hero)
@@ -206,6 +208,9 @@ func _emit_status() -> void:
 func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 	if loot_manager != null:
 		loot_manager.roll_loot_for_enemy(enemy.unit_id, enemy.global_position + Vector2(0.0, -18.0))
+	if progression_manager != null:
+		var reward := _reward_for_enemy(enemy.unit_id)
+		progression_manager.grant_rewards(reward["exp"], reward["coin"])
 
 	if enemy.unit_id == BossDataResource.id:
 		battle_state.boss_defeated = true
@@ -265,3 +270,16 @@ func _on_loot_pickup(item_data: ItemData) -> void:
 func _apply_equipment_to_hero(total_stats: Dictionary, _summary_text: String) -> void:
 	if is_instance_valid(hero_unit):
 		hero_unit.apply_stat_bonus(total_stats)
+
+
+func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
+	if enemy_id == BossDataResource.id:
+		return {
+			"exp": BossDataResource.reward_exp,
+			"coin": BossDataResource.reward_coin,
+		}
+
+	return {
+		"exp": EnemyDataResource.reward_exp,
+		"coin": EnemyDataResource.reward_coin,
+	}

@@ -6,11 +6,13 @@ const HERO_DATA_DIR := "res://resources/heroes"
 const ENEMY_DATA_DIR := "res://resources/enemies"
 const STAGE_DATA_DIR := "res://resources/stages"
 const ITEM_DATA_DIR := "res://resources/items"
+const TEAM_SLOT_DATA_DIR := "res://resources/team_slots"
 
 var heroes: Dictionary[StringName, Resource] = {}
 var enemies: Dictionary[StringName, Resource] = {}
 var stages: Dictionary[StringName, Resource] = {}
 var items: Dictionary[StringName, Resource] = {}
+var team_slots: Dictionary[StringName, Resource] = {}
 
 
 func _ready() -> void:
@@ -18,6 +20,7 @@ func _ready() -> void:
 	enemies = _load_resources(ENEMY_DATA_DIR)
 	stages = _load_resources(STAGE_DATA_DIR)
 	items = _load_resources(ITEM_DATA_DIR)
+	team_slots = _load_resources(TEAM_SLOT_DATA_DIR)
 
 
 func get_hero_data(id: StringName) -> Resource:
@@ -34,6 +37,10 @@ func get_stage_data(id: StringName) -> Resource:
 
 func get_item_data(id: StringName) -> Resource:
 	return items.get(id)
+
+
+func get_team_slot_data(id: StringName) -> Resource:
+	return team_slots.get(id)
 
 
 func _load_resources(directory: String) -> Dictionary[StringName, Resource]:
