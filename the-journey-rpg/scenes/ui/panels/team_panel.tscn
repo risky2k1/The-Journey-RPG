@@ -3,12 +3,43 @@
 [node name="TeamPanel" type="VBoxContainer"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="."]
 layout_mode = 2
+theme_override_font_sizes/font_size = 15
 text = "Team"
 
-[node name="Body" type="RichTextLabel" parent="."]
+[node name="Scroll" type="ScrollContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Hint" type="Label" parent="Scroll/Content"]
+layout_mode = 2
+autowrap_mode = 3
+modulate = Color(0.44, 0.46, 0.52, 1)
+text = "Pick a hero below, then click a grid cell to place them."
+
+[node name="HeroRoster" type="HBoxContainer" parent="Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FormationGrid" type="GridContainer" parent="Scroll/Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 3
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="Body" type="RichTextLabel" parent="Scroll/Content"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 92)
+size_flags_vertical = 1
 text = "Slot 1 unlocked. Slot 2 and 3 are shown as future progression."

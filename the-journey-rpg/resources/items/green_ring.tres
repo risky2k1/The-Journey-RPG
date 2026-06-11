@@ -6,7 +6,7 @@
 script = ExtResource("1_re1y6")
 id = &"item_green_ring"
 display_name = "Green Ring"
-slot_type = &"accessory"
+slot_type = &"ring"
 rarity = &"uncommon"
 icon_id = &"item_green_ring_icon"
 stat_profile = {

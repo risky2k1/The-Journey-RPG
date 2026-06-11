@@ -10,49 +10,98 @@ offset_left = 8.0
 offset_top = 108.0
 offset_right = 1272.0
 offset_bottom = 314.0
-color = Color(0.1, 0.125, 0.11, 0.92)
+color = Color(0.08, 0.1, 0.09, 0.94)
+
+[node name="BackdropSky" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 118.0
+offset_right = 900.0
+offset_bottom = 186.0
+color = Color(0.11, 0.16, 0.14, 0.94)
+
+[node name="BackdropMist" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 178.0
+offset_right = 900.0
+offset_bottom = 224.0
+color = Color(0.3, 0.42, 0.36, 0.08)
 
 [node name="BattlefieldInset" type="ColorRect" parent="."]
 offset_left = 24.0
 offset_top = 132.0
 offset_right = 900.0
 offset_bottom = 294.0
-color = Color(0.145, 0.18, 0.15, 0.98)
+color = Color(0.13, 0.17, 0.145, 0.98)
+
+[node name="FarGround" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 210.0
+offset_right = 900.0
+offset_bottom = 246.0
+color = Color(0.18, 0.22, 0.18, 0.38)
+
+[node name="NearGround" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 246.0
+offset_right = 900.0
+offset_bottom = 294.0
+color = Color(0.16, 0.21, 0.17, 0.92)
 
 [node name="LeftGlow" type="ColorRect" parent="."]
 offset_left = 24.0
 offset_top = 132.0
 offset_right = 240.0
 offset_bottom = 294.0
-color = Color(0.19, 0.28, 0.22, 0.35)
+color = Color(0.24, 0.34, 0.26, 0.32)
 
 [node name="RightGlow" type="ColorRect" parent="."]
 offset_left = 684.0
 offset_top = 132.0
 offset_right = 900.0
 offset_bottom = 294.0
-color = Color(0.22, 0.16, 0.16, 0.28)
+color = Color(0.3, 0.16, 0.16, 0.26)
 
 [node name="CenterLane" type="ColorRect" parent="."]
-offset_left = 412.0
-offset_top = 146.0
-offset_right = 516.0
-offset_bottom = 280.0
-color = Color(0.2, 0.26, 0.22, 0.22)
+offset_left = 392.0
+offset_top = 154.0
+offset_right = 540.0
+offset_bottom = 282.0
+color = Color(0.78, 0.86, 0.74, 0.08)
+
+[node name="BossGate" type="ColorRect" parent="."]
+offset_left = 776.0
+offset_top = 140.0
+offset_right = 862.0
+offset_bottom = 286.0
+color = Color(0.4, 0.18, 0.18, 0.12)
+
+[node name="HeroAnchorGlow" type="ColorRect" parent="."]
+offset_left = 112.0
+offset_top = 188.0
+offset_right = 318.0
+offset_bottom = 286.0
+color = Color(0.38, 0.72, 0.54, 0.08)
 
 [node name="LaneTop" type="ColorRect" parent="."]
 offset_left = 24.0
 offset_top = 172.0
 offset_right = 900.0
 offset_bottom = 174.0
-color = Color(0.75, 0.85, 0.76, 0.08)
+color = Color(0.86, 0.92, 0.84, 0.1)
+
+[node name="LaneMid" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 214.0
+offset_right = 900.0
+offset_bottom = 216.0
+color = Color(0.84, 0.9, 0.8, 0.06)
 
 [node name="LaneBottom" type="ColorRect" parent="."]
 offset_left = 24.0
 offset_top = 246.0
 offset_right = 900.0
 offset_bottom = 248.0
-color = Color(0.75, 0.85, 0.76, 0.08)
+color = Color(0.86, 0.92, 0.84, 0.12)
 
 [node name="UnitLayer" type="Node2D" parent="."]
 y_sort_enabled = true

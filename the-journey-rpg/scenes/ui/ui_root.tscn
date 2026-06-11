@@ -22,67 +22,95 @@ mouse_filter = 2
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 660.0
-offset_bottom = 52.0
+offset_bottom = 72.0
+self_modulate = Color(0.9, 0.96, 0.92, 0.96)
 
-[node name="TopBarLabel" type="Label" parent="HUD/TopBar"]
+[node name="TopBarContent" type="VBoxContainer" parent="HUD/TopBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+
+[node name="TopBarLabel" type="Label" parent="HUD/TopBar/TopBarContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
 text = "Lv 1  |  EXP 0/10  |  Coin 0  |  Stage 1"
+
+[node name="TopBarSubLabel" type="Label" parent="HUD/TopBar/TopBarContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.24, 0.3, 0.26, 0.92)
+text = "Battle status"
 
 [node name="QuickButtons" type="HBoxContainer" parent="HUD"]
 offset_left = 16.0
-offset_top = 62.0
+offset_top = 82.0
 offset_right = 472.0
-offset_bottom = 100.0
-theme_override_constants/separation = 8
+offset_bottom = 120.0
+theme_override_constants/separation = 10
 
 [node name="InventoryButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
-custom_minimum_size = Vector2(88, 0)
+custom_minimum_size = Vector2(96, 30)
 text = "Inventory"
 
 [node name="CharacterButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
-custom_minimum_size = Vector2(88, 0)
+custom_minimum_size = Vector2(96, 30)
 text = "Character"
 
 [node name="TeamButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
+custom_minimum_size = Vector2(80, 30)
 text = "Team"
 
 [node name="SettingsButton" type="Button" parent="HUD/QuickButtons"]
 layout_mode = 2
-custom_minimum_size = Vector2(84, 0)
+custom_minimum_size = Vector2(92, 30)
 text = "Settings"
 
 [node name="LootFeed" type="PanelContainer" parent="HUD"]
 offset_left = 16.0
-offset_top = 112.0
-offset_right = 340.0
-offset_bottom = 168.0
+offset_top = 132.0
+offset_right = 372.0
+offset_bottom = 212.0
+self_modulate = Color(1, 0.98, 0.92, 0.98)
 
-[node name="LootFeedLabel" type="Label" parent="HUD/LootFeed"]
+[node name="LootFeedContent" type="VBoxContainer" parent="HUD/LootFeed"]
+layout_mode = 2
+
+[node name="LootFeedTitle" type="Label" parent="HUD/LootFeed/LootFeedContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.48, 0.38, 0.22, 0.96)
+text = "Recent Event"
+
+[node name="LootFeedLabel" type="Label" parent="HUD/LootFeed/LootFeedContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "Latest event"
 
-[node name="PanelHost" type="MarginContainer" parent="HUD"]
+[node name="PanelHost" type="PanelContainer" parent="HUD"]
 offset_left = 948.0
 offset_top = 16.0
 offset_right = 1248.0
 offset_bottom = 300.0
+self_modulate = Color(0.96, 0.96, 0.98, 0.98)
 
-[node name="PanelStack" type="TabContainer" parent="HUD/PanelHost"]
+[node name="PanelPadding" type="MarginContainer" parent="HUD/PanelHost"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PanelStack" type="TabContainer" parent="HUD/PanelHost/PanelPadding"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 current_tab = 0
 
-[node name="InventoryPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("2_qeuo1")]
+[node name="InventoryPanel" parent="HUD/PanelHost/PanelPadding/PanelStack" instance=ExtResource("2_qeuo1")]
 
-[node name="CharacterPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("3_2qhwu")]
+[node name="CharacterPanel" parent="HUD/PanelHost/PanelPadding/PanelStack" instance=ExtResource("3_2qhwu")]
 
-[node name="TeamPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("4_dj1ea")]
+[node name="TeamPanel" parent="HUD/PanelHost/PanelPadding/PanelStack" instance=ExtResource("4_dj1ea")]
 
-[node name="SettingsPanel" parent="HUD/PanelHost/PanelStack" instance=ExtResource("5_l481x")]
+[node name="SettingsPanel" parent="HUD/PanelHost/PanelPadding/PanelStack" instance=ExtResource("5_l481x")]

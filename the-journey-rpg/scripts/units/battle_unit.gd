@@ -2,7 +2,12 @@ extends Node2D
 
 class_name BattleUnit
 
+@onready var shadow: Polygon2D = $Shadow
+@onready var aura: Polygon2D = $Aura
+@onready var back_accent: Polygon2D = $BackAccent
 @onready var body: Polygon2D = $Body
+@onready var chest_accent: Polygon2D = $ChestAccent
+@onready var weapon: Polygon2D = $Weapon
 @onready var name_label: Label = $NameLabel
 @onready var hp_bar_fill: ColorRect = $HpBarFill
 @onready var hp_bar_background: ColorRect = $HpBarBackground
@@ -24,6 +29,9 @@ var move_speed: float = 80.0
 var attack_range: float = 48.0
 var attack_cooldown_remaining: float = 0.0
 var alive: bool = true
+var formation_slot_index: int = -1
+var formation_row_index: int = 0
+var formation_column_index: int = 1
 
 
 func configure(config: Dictionary) -> void:
@@ -43,13 +51,9 @@ func configure(config: Dictionary) -> void:
 	attack_range = base_attack_range
 
 	if team == &"hero":
-		body.color = Color(0.36, 0.8, 0.55, 1.0)
-		hp_bar_fill.color = Color(0.2, 0.85, 0.25, 1.0)
-		name_label.modulate = Color(0.9, 1.0, 0.92, 1.0)
+		_apply_hero_visuals()
 	else:
-		body.color = Color(0.86, 0.35, 0.36, 1.0)
-		hp_bar_fill.color = Color(0.92, 0.48, 0.22, 1.0)
-		name_label.modulate = Color(1.0, 0.93, 0.92, 1.0)
+		_apply_enemy_visuals()
 
 	name_label.text = display_name
 	_update_hp_bar()
@@ -112,9 +116,53 @@ func apply_stat_bonus(stat_bonus: Dictionary) -> void:
 	set_state_text("Equipped")
 
 
+func _apply_hero_visuals() -> void:
+	if unit_id == &"hero_apprentice":
+		scale = Vector2(0.92, 0.92)
+		body.color = Color(0.36, 0.58, 0.92, 1.0)
+		back_accent.color = Color(0.15, 0.23, 0.34, 1.0)
+		chest_accent.color = Color(0.9, 0.94, 1.0, 0.92)
+		weapon.color = Color(0.78, 0.9, 1.0, 1.0)
+		aura.color = Color(0.4, 0.7, 1.0, 0.16)
+		hp_bar_fill.color = Color(0.42, 0.74, 1.0, 1.0)
+		name_label.modulate = Color(0.9, 0.96, 1.0, 1.0)
+		return
+
+	scale = Vector2.ONE
+	body.color = Color(0.36, 0.8, 0.55, 1.0)
+	back_accent.color = Color(0.15, 0.26, 0.2, 1.0)
+	chest_accent.color = Color(0.88, 0.98, 0.9, 0.9)
+	weapon.color = Color(0.92, 0.84, 0.6, 1.0)
+	aura.color = Color(0.35, 0.8, 0.58, 0.14)
+	hp_bar_fill.color = Color(0.2, 0.85, 0.25, 1.0)
+	name_label.modulate = Color(0.9, 1.0, 0.92, 1.0)
+
+
+func _apply_enemy_visuals() -> void:
+	scale = Vector2.ONE
+	if unit_id == &"enemy_slime_king":
+		body.color = Color(0.52, 0.2, 0.62, 1.0)
+		back_accent.color = Color(0.24, 0.09, 0.28, 1.0)
+		chest_accent.color = Color(0.9, 0.72, 1.0, 0.78)
+		weapon.color = Color(0.9, 0.54, 0.94, 1.0)
+		aura.color = Color(0.78, 0.38, 0.95, 0.2)
+		hp_bar_fill.color = Color(0.98, 0.46, 0.82, 1.0)
+		name_label.modulate = Color(1.0, 0.9, 1.0, 1.0)
+		return
+
+	body.color = Color(0.86, 0.35, 0.36, 1.0)
+	back_accent.color = Color(0.34, 0.12, 0.14, 1.0)
+	chest_accent.color = Color(1.0, 0.84, 0.74, 0.82)
+	weapon.color = Color(0.95, 0.62, 0.26, 1.0)
+	aura.color = Color(0.9, 0.38, 0.32, 0.14)
+	hp_bar_fill.color = Color(0.92, 0.48, 0.22, 1.0)
+	name_label.modulate = Color(1.0, 0.93, 0.92, 1.0)
+
+
 func _update_hp_bar() -> void:
 	var ratio: float = 0.0 if max_hp <= 0 else current_hp / float(max_hp)
 	hp_bar_fill.size.x = 56.0 * ratio
 	hp_bar_fill.position.x = -34.0
 	hp_bar_background.size.x = 68.0
 	hp_bar_background.position.x = -34.0
+	shadow.scale.x = 0.82 + (ratio * 0.2)

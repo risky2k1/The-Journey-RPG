@@ -9,6 +9,7 @@ var save_manager: SaveManager
 var loot_manager: LootManager
 var progression_manager: ProgressionManager
 var battle_manager: BattleManager
+var team_manager: TeamManager
 var window_behavior_manager: WindowBehaviorManager
 
 
@@ -32,6 +33,7 @@ func _bootstrap_runtime() -> void:
 	loot_manager = get_parent().get_node_or_null("LootManager")
 	progression_manager = get_parent().get_node_or_null("ProgressionManager")
 	battle_manager = get_parent().get_parent().get_node_or_null("WindowRoot/BattleRoot")
+	team_manager = get_parent().get_node_or_null("TeamManager")
 	window_behavior_manager = get_parent().get_node_or_null("WindowBehaviorManager")
 
 	if save_manager != null:
@@ -44,6 +46,8 @@ func _bootstrap_runtime() -> void:
 		progression_manager.progression_changed.connect(_on_runtime_changed)
 	if battle_manager != null:
 		battle_manager.battle_event_changed.connect(_on_runtime_changed)
+	if team_manager != null:
+		team_manager.team_changed.connect(_on_runtime_changed)
 	if window_behavior_manager != null:
 		window_behavior_manager.window_state_changed.connect(_on_runtime_changed)
 
@@ -57,6 +61,8 @@ func _apply_snapshot(snapshot: Dictionary) -> void:
 		progression_manager.apply_state(snapshot.get("progression", {}))
 	if loot_manager != null:
 		loot_manager.apply_state(snapshot.get("loot", {}))
+	if team_manager != null:
+		team_manager.apply_state(snapshot.get("team", {}))
 	if battle_manager != null:
 		battle_manager.apply_state(snapshot.get("battle", {}))
 	if window_behavior_manager != null:
@@ -72,6 +78,7 @@ func _persist_snapshot() -> void:
 		"progression": progression_manager.export_state() if progression_manager != null else {},
 		"loot": loot_manager.export_state() if loot_manager != null else {},
 		"battle": battle_manager.export_state() if battle_manager != null else {},
+		"team": team_manager.export_state() if team_manager != null else {},
 		"window": window_behavior_manager.export_state() if window_behavior_manager != null else {},
 	}
 	save_manager.save_snapshot(snapshot)

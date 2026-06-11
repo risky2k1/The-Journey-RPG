@@ -255,6 +255,13 @@ Thêm cảm giác mạnh lên và chuẩn bị cho fantasy party mở rộng.
 
 Phase này chưa bắt buộc phải spawn hero thứ hai ngay, nhưng nền tảng phải sẵn.
 
+### Tiến độ thêm sau Phase 6
+
+- [x] Prototype spawn hero thứ hai khi mở slot 2.
+- [x] Graybox visual pass cho battlefield, unit và loot.
+- [x] Team formation `3x3` + row targeting foundation.
+- [x] Team panel UX polish để đặt hero vào formation grid.
+
 ---
 
 ## 11. Phase 7 - Save và Load
