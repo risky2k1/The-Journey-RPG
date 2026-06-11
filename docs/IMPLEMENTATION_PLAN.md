@@ -154,12 +154,12 @@ Biến combat thành một loop có tiến trình rõ ràng.
 
 ### Công việc
 
-- [ ] Thêm `kill_count`.
-- [ ] Thêm `kill_target`.
-- [ ] Thêm HUD stage progress.
-- [ ] Khi đủ kill target thì spawn boss.
-- [ ] Boss chết thì tăng stage.
-- [ ] Reset progress cho stage mới.
+- [x] Thêm `kill_count`.
+- [x] Thêm `kill_target`.
+- [x] Thêm HUD stage progress.
+- [x] Khi đủ kill target thì spawn boss.
+- [x] Boss chết thì tăng stage.
+- [x] Reset progress cho stage mới.
 
 ### Kết quả mong đợi
 
@@ -337,7 +337,7 @@ Các hướng mở rộng:
 
 ### Milestone C
 
-- [ ] Stage progress + boss hoạt động.
+- [x] Stage progress + boss hoạt động.
 
 ### Milestone D
 

@@ -3,14 +3,18 @@ extends Node2D
 class_name BattleManager
 
 const BattleUnitScene := preload("res://scenes/units/battle_unit.tscn")
+const BattleStateScript := preload("res://scripts/state/battle_state.gd")
 const HeroDataResource := preload("res://resources/heroes/adventurer.tres")
 const EnemyDataResource := preload("res://resources/enemies/slime.tres")
+const BossDataResource := preload("res://resources/enemies/slime_king.tres")
 
 signal battle_bootstrapped
 signal battle_status_changed(status_text: String)
+signal battle_event_changed(event_text: String)
 
 @onready var unit_layer: Node2D = $UnitLayer
 
+var battle_state: BattleState
 var hero_unit: BattleUnit
 var enemy_units: Array[BattleUnit] = []
 var enemy_respawn_queue: Array[float] = []
@@ -19,11 +23,14 @@ var hero_spawn_position := Vector2(180.0, 244.0)
 var enemy_spawn_position := Vector2(760.0, 170.0)
 var battlefield_left_limit := 150.0
 var battlefield_right_limit := 820.0
+var current_stage_number: int = 1
 
 
 func _ready() -> void:
+	battle_state = BattleStateScript.new()
 	_spawn_hero()
 	_spawn_enemy()
+	_emit_event("Stage %d begins" % current_stage_number)
 	_emit_status()
 	battle_bootstrapped.emit()
 
@@ -52,19 +59,33 @@ func _spawn_hero() -> void:
 
 
 func _spawn_enemy() -> void:
+	_spawn_enemy_from_data(EnemyDataResource, false)
+
+
+func _spawn_boss() -> void:
+	_spawn_enemy_from_data(BossDataResource, true)
+	battle_state.boss_spawned = true
+	_emit_event("Boss appeared: %s" % BossDataResource.display_name)
+
+
+func _spawn_enemy_from_data(data: EnemyData, is_boss: bool) -> void:
 	var enemy: BattleUnit = BattleUnitScene.instantiate()
 	unit_layer.add_child(enemy)
 	enemy.configure({
-		"unit_id": EnemyDataResource.id,
+		"unit_id": data.id,
 		"team": &"enemy",
-		"display_name": EnemyDataResource.display_name,
-		"max_hp": EnemyDataResource.base_hp,
-		"attack": EnemyDataResource.base_attack,
-		"attack_speed": EnemyDataResource.base_attack_speed,
-		"move_speed": EnemyDataResource.base_move_speed,
-		"attack_range": EnemyDataResource.attack_range,
+		"display_name": data.display_name,
+		"max_hp": data.base_hp + _boss_hp_bonus(is_boss),
+		"attack": data.base_attack + _boss_attack_bonus(is_boss),
+		"attack_speed": data.base_attack_speed,
+		"move_speed": data.base_move_speed,
+		"attack_range": data.attack_range,
 	})
 	enemy.global_position = enemy_spawn_position + Vector2(randf_range(-24.0, 24.0), randf_range(-10.0, 10.0))
+	if is_boss:
+		enemy.scale = Vector2(1.2, 1.2)
+		enemy.global_position = enemy_spawn_position + Vector2(0.0, -8.0)
+		enemy.set_state_text("Boss")
 	enemy_units.append(enemy)
 
 
@@ -73,7 +94,8 @@ func _tick_respawns(delta: float) -> void:
 		enemy_respawn_queue[index] -= delta
 		if enemy_respawn_queue[index] <= 0.0:
 			enemy_respawn_queue.remove_at(index)
-			_spawn_enemy()
+			if not battle_state.boss_spawned:
+				_spawn_enemy()
 
 	if hero_respawn_timer > 0.0:
 		hero_respawn_timer = max(hero_respawn_timer - delta, 0.0)
@@ -105,8 +127,8 @@ func _process_hero(delta: float) -> void:
 		hero_unit.set_state_text("Hit %d" % hero_unit.attack)
 
 		if not enemy.is_alive():
+			_handle_enemy_defeated(enemy)
 			enemy_units.erase(enemy)
-			enemy_respawn_queue.append(1.1)
 			enemy.queue_free()
 
 
@@ -162,5 +184,54 @@ func _emit_status() -> void:
 		if is_instance_valid(enemy) and enemy.is_alive():
 			alive_enemy_count += 1
 
-	var status_text := "Combat live  |  Hero HP %s  |  Enemies %d" % [hero_hp_text, alive_enemy_count]
+	var boss_text := "Boss up" if battle_state.boss_spawned else "Boss pending"
+	var status_text := "Stage %d  |  Kills %d/%d  |  %s  |  HP %s  |  Enemies %d" % [
+		current_stage_number,
+		battle_state.kill_count,
+		battle_state.kill_target,
+		boss_text,
+		hero_hp_text,
+		alive_enemy_count
+	]
 	battle_status_changed.emit(status_text)
+
+
+func _handle_enemy_defeated(enemy: BattleUnit) -> void:
+	if enemy.unit_id == BossDataResource.id:
+		battle_state.boss_defeated = true
+		_complete_stage()
+		return
+
+	battle_state.kill_count += 1
+	_emit_event("Kill %d/%d" % [battle_state.kill_count, battle_state.kill_target])
+
+	if battle_state.kill_count >= battle_state.kill_target and not battle_state.boss_spawned:
+		_spawn_boss()
+	else:
+		enemy_respawn_queue.append(1.1)
+
+
+func _complete_stage() -> void:
+	current_stage_number += 1
+	battle_state.kill_count = 0
+	battle_state.kill_target += 4
+	battle_state.boss_spawned = false
+	battle_state.boss_defeated = false
+	_emit_event("Stage %d unlocked" % current_stage_number)
+	_spawn_enemy()
+
+
+func _boss_hp_bonus(is_boss: bool) -> int:
+	if not is_boss:
+		return 0
+	return (current_stage_number - 1) * 20
+
+
+func _boss_attack_bonus(is_boss: bool) -> int:
+	if not is_boss:
+		return 0
+	return current_stage_number - 1
+
+
+func _emit_event(event_text: String) -> void:
+	battle_event_changed.emit(event_text)
