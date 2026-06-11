@@ -4,6 +4,7 @@ class_name BattleManager
 
 const BattleUnitScene := preload("res://scenes/units/battle_unit.tscn")
 const BattleStateScript := preload("res://scripts/state/battle_state.gd")
+const LootDropScene := preload("res://scenes/battle/loot_drop.tscn")
 const HeroDataResource := preload("res://resources/heroes/adventurer.tres")
 const EnemyDataResource := preload("res://resources/enemies/slime.tres")
 const BossDataResource := preload("res://resources/enemies/slime_king.tres")
@@ -13,6 +14,7 @@ signal battle_status_changed(status_text: String)
 signal battle_event_changed(event_text: String)
 
 @onready var unit_layer: Node2D = $UnitLayer
+@onready var loot_layer: Node2D = $LootLayer
 
 var battle_state: BattleState
 var hero_unit: BattleUnit
@@ -24,10 +26,14 @@ var enemy_spawn_position := Vector2(760.0, 170.0)
 var battlefield_left_limit := 150.0
 var battlefield_right_limit := 820.0
 var current_stage_number: int = 1
+var loot_manager: LootManager
 
 
 func _ready() -> void:
 	battle_state = BattleStateScript.new()
+	loot_manager = get_parent().get_parent().get_node_or_null("AppRoot/LootManager")
+	if loot_manager != null:
+		loot_manager.loot_dropped.connect(_spawn_loot_drop)
 	_spawn_hero()
 	_spawn_enemy()
 	_emit_event("Stage %d begins" % current_stage_number)
@@ -197,6 +203,9 @@ func _emit_status() -> void:
 
 
 func _handle_enemy_defeated(enemy: BattleUnit) -> void:
+	if loot_manager != null:
+		loot_manager.roll_loot_for_enemy(enemy.unit_id, enemy.global_position + Vector2(0.0, -18.0))
+
 	if enemy.unit_id == BossDataResource.id:
 		battle_state.boss_defeated = true
 		_complete_stage()
@@ -235,3 +244,18 @@ func _boss_attack_bonus(is_boss: bool) -> int:
 
 func _emit_event(event_text: String) -> void:
 	battle_event_changed.emit(event_text)
+
+
+func _spawn_loot_drop(item_data: ItemData, world_position: Vector2) -> void:
+	var loot_drop: LootDrop = LootDropScene.instantiate()
+	loot_layer.add_child(loot_drop)
+	loot_drop.global_position = world_position
+	loot_drop.configure(item_data)
+	loot_drop.pickup_requested.connect(_on_loot_pickup)
+	_emit_event("Loot dropped: %s" % item_data.display_name)
+
+
+func _on_loot_pickup(item_data: ItemData) -> void:
+	if loot_manager != null:
+		loot_manager.register_pickup(item_data)
+	_emit_event("Picked up: %s" % item_data.display_name)

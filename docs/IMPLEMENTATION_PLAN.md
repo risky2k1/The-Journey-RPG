@@ -181,12 +181,12 @@ Thêm hook quan trọng nhất của sản phẩm: loot rơi.
 ### Công việc
 
 - [x] Tạo `ItemData` mẫu.
-- [ ] Tạo loot roll đơn giản cho quái.
-- [ ] Khi quái chết, có xác suất rơi item.
-- [ ] Hiển thị item trên battlefield.
-- [ ] Thêm màu bao quanh cho item hiếm.
-- [ ] Thêm beam hoặc cột sáng cho item hiếm.
-- [ ] Tạo `LootFeed` ngắn nếu cần.
+- [x] Tạo loot roll đơn giản cho quái.
+- [x] Khi quái chết, có xác suất rơi item.
+- [x] Hiển thị item trên battlefield.
+- [x] Thêm màu bao quanh cho item hiếm.
+- [x] Thêm beam hoặc cột sáng cho item hiếm.
+- [x] Tạo `LootFeed` ngắn nếu cần.
 
 ### Kết quả mong đợi
 
@@ -341,7 +341,7 @@ Các hướng mở rộng:
 
 ### Milestone D
 
-- [ ] Loot rơi ra và nổi bật.
+- [x] Loot rơi ra và nổi bật.
 
 ### Milestone E
 

@@ -9,6 +9,7 @@ class_name UIManager
 @onready var settings_button: Button = get_node("HUD/QuickButtons/SettingsButton")
 @onready var top_bar_label: Label = get_node("HUD/TopBar/TopBarLabel")
 @onready var loot_feed_label: Label = get_node("HUD/LootFeed/LootFeedLabel")
+@onready var inventory_body_label: RichTextLabel = get_node("HUD/PanelHost/PanelStack/InventoryPanel/Body")
 
 
 func _ready() -> void:
@@ -21,6 +22,9 @@ func _ready() -> void:
 		battle_root.battle_status_changed.connect(_update_status)
 	if battle_root != null and battle_root.has_signal("battle_event_changed"):
 		battle_root.battle_event_changed.connect(_update_event)
+	var loot_manager := get_parent().get_parent().get_node_or_null("AppRoot/LootManager")
+	if loot_manager != null and loot_manager.has_signal("inventory_changed"):
+		loot_manager.inventory_changed.connect(_update_inventory_text)
 
 
 func _open_inventory() -> void:
@@ -45,3 +49,7 @@ func _update_status(status_text: String) -> void:
 
 func _update_event(event_text: String) -> void:
 	loot_feed_label.text = event_text
+
+
+func _update_inventory_text(inventory_text: String) -> void:
+	inventory_body_label.text = inventory_text
