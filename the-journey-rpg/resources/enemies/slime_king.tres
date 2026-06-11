@@ -17,3 +17,4 @@ reward_coin = 10
 loot_table_id = &"slime_boss"
 sprite_id = &"enemy_slime_king_sprite"
 is_boss = true
+target_rule = &"lowest_hp"

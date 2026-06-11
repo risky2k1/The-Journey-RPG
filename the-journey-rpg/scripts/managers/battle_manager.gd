@@ -7,6 +7,7 @@ const BattleStateScript := preload("res://scripts/state/battle_state.gd")
 const LootDropScene := preload("res://scenes/battle/loot_drop.tscn")
 const HeroDataResource := preload("res://resources/heroes/adventurer.tres")
 const SecondHeroDataResource := preload("res://resources/heroes/apprentice.tres")
+const StageDataResource := preload("res://resources/stages/stage_001.tres")
 const SlimeEnemyDataResource := preload("res://resources/enemies/slime.tres")
 const NeedleBatEnemyDataResource := preload("res://resources/enemies/needle_bat.tres")
 const BossDataResource := preload("res://resources/enemies/slime_king.tres")
@@ -24,7 +25,7 @@ signal battle_event_changed(event_text: String)
 var battle_state: BattleState
 var hero_units: Array[BattleUnit] = []
 var enemy_units: Array[BattleUnit] = []
-var enemy_respawn_queue: Array[float] = []
+var enemy_respawn_queue: Array = []
 var hero_respawn_timers: Dictionary = {}
 var hero_units_by_id: Dictionary = {}
 var enemy_data_by_instance_id: Dictionary = {}
@@ -46,7 +47,7 @@ var current_stage_number: int = 1
 var loot_manager: LootManager
 var progression_manager: ProgressionManager
 var team_manager: TeamManager
-var normal_enemy_spawn_count: int = 0
+var data_registry: DataRegistry
 
 
 func _ready() -> void:
@@ -54,11 +55,13 @@ func _ready() -> void:
 	loot_manager = get_parent().get_parent().get_node_or_null("AppRoot/LootManager")
 	progression_manager = get_parent().get_parent().get_node_or_null("AppRoot/ProgressionManager")
 	team_manager = get_parent().get_parent().get_node_or_null("AppRoot/TeamManager")
+	data_registry = get_parent().get_parent().get_node_or_null("AppRoot/DataRegistry")
 	if loot_manager != null:
 		loot_manager.loot_dropped.connect(_spawn_loot_drop)
 		loot_manager.equipment_changed.connect(_apply_equipment_to_heroes)
 	if team_manager != null:
 		team_manager.team_changed.connect(_on_team_changed)
+	_apply_stage_data()
 	_sync_hero_party()
 	_spawn_enemy()
 	_emit_event("Stage %d begins" % current_stage_number)
@@ -104,13 +107,14 @@ func _spawn_hero_for_entry(formation_entry: Dictionary) -> void:
 
 
 func _spawn_enemy() -> void:
-	_spawn_enemy_from_data(_next_normal_enemy_data(), false)
+	_spawn_normal_enemy_pack()
 
 
 func _spawn_boss() -> void:
-	_spawn_enemy_from_data(BossDataResource, true)
+	var boss_data: EnemyData = _current_boss_enemy_data()
+	_spawn_enemy_from_data(boss_data, true)
 	battle_state.boss_spawned = true
-	_emit_event("Boss appeared: %s" % BossDataResource.display_name)
+	_emit_event("Boss appeared: %s" % boss_data.display_name)
 
 
 func _spawn_enemy_from_data(data: EnemyData, is_boss: bool) -> void:
@@ -137,11 +141,17 @@ func _spawn_enemy_from_data(data: EnemyData, is_boss: bool) -> void:
 
 func _tick_respawns(delta: float) -> void:
 	for index in range(enemy_respawn_queue.size() - 1, -1, -1):
-		enemy_respawn_queue[index] -= delta
-		if enemy_respawn_queue[index] <= 0.0:
+		var queue_entry: Dictionary = enemy_respawn_queue[index]
+		var timer_value: float = maxf(float(queue_entry.get("timer", 0.0)) - delta, 0.0)
+		queue_entry["timer"] = timer_value
+		enemy_respawn_queue[index] = queue_entry
+		if timer_value <= 0.0:
 			enemy_respawn_queue.remove_at(index)
 			if not battle_state.boss_spawned:
-				_spawn_enemy()
+				var enemy_id: StringName = StringName(queue_entry.get("enemy_id", &""))
+				var enemy_data: EnemyData = _enemy_data_for_id(enemy_id)
+				if enemy_data != null:
+					_spawn_enemy_from_data(enemy_data, false)
 
 	for hero_index in range(hero_units.size()):
 		var hero_unit: BattleUnit = hero_units[hero_index]
@@ -203,11 +213,11 @@ func _process_enemies(delta: float) -> void:
 
 		if distance > enemy.attack_range:
 			_move_towards(enemy, hero_target.global_position, delta)
-			enemy.set_state_text("Closing")
+			enemy.set_state_text(_enemy_target_state_text(enemy, hero_target, "Chase"))
 		elif enemy.can_attack():
 			hero_target.take_damage(enemy.attack)
 			enemy.reset_attack_cooldown()
-			enemy.set_state_text("Hit %d" % enemy.attack)
+			enemy.set_state_text(_enemy_target_state_text(enemy, hero_target, "Hit %d" % enemy.attack))
 
 			if not hero_target.is_alive():
 				hero_respawn_timers[str(hero_target.unit_id)] = 2.0
@@ -335,7 +345,7 @@ func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 	if battle_state.kill_count >= battle_state.kill_target and not battle_state.boss_spawned:
 		_spawn_boss()
 	else:
-		enemy_respawn_queue.append(1.1)
+		_queue_enemy_respawn(enemy_data)
 
 
 func _complete_stage() -> void:
@@ -400,6 +410,7 @@ func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
 
 func export_state() -> Dictionary:
 	return {
+		"current_stage_id": str(battle_state.current_stage_id),
 		"current_stage_number": current_stage_number,
 		"kill_count": battle_state.kill_count,
 		"kill_target": battle_state.kill_target,
@@ -412,9 +423,11 @@ func apply_state(snapshot: Dictionary) -> void:
 	if snapshot.is_empty():
 		return
 
+	battle_state.current_stage_id = StringName(snapshot.get("current_stage_id", battle_state.current_stage_id))
 	current_stage_number = int(snapshot.get("current_stage_number", 1))
 	battle_state.kill_count = int(snapshot.get("kill_count", 0))
-	battle_state.kill_target = int(snapshot.get("kill_target", 20))
+	_apply_stage_data()
+	battle_state.kill_target = int(snapshot.get("kill_target", battle_state.kill_target))
 	battle_state.boss_spawned = bool(snapshot.get("boss_spawned", false))
 	battle_state.boss_defeated = bool(snapshot.get("boss_defeated", false))
 
@@ -484,16 +497,19 @@ func _hero_data_for_id(hero_id: StringName) -> HeroData:
 			return HeroDataResource
 
 
-func _next_normal_enemy_data() -> EnemyData:
-	var enemy_data: EnemyData = SlimeEnemyDataResource
-	if normal_enemy_spawn_count % 3 == 2:
-		enemy_data = NeedleBatEnemyDataResource
-	normal_enemy_spawn_count += 1
-	return enemy_data
+func _spawn_normal_enemy_pack() -> void:
+	for enemy_data in _current_stage_enemy_pool():
+		_spawn_enemy_from_data(enemy_data, false)
 
 
 func _enemy_data_for_id(enemy_id: StringName) -> EnemyData:
+	if data_registry != null:
+		var registry_enemy_data: EnemyData = data_registry.get_enemy_data(enemy_id) as EnemyData
+		if registry_enemy_data != null:
+			return registry_enemy_data
 	match enemy_id:
+		SlimeEnemyDataResource.id:
+			return SlimeEnemyDataResource
 		NeedleBatEnemyDataResource.id:
 			return NeedleBatEnemyDataResource
 		BossDataResource.id:
@@ -515,10 +531,66 @@ func _enemy_target_rule(enemy: BattleUnit) -> StringName:
 	return StringName(enemy_data.target_rule)
 
 
+func _queue_enemy_respawn(enemy_data: EnemyData) -> void:
+	if enemy_data == null or enemy_data.is_boss:
+		return
+	enemy_respawn_queue.append({
+		"timer": 1.1,
+		"enemy_id": enemy_data.id,
+	})
+
+
+func _enemy_target_state_text(enemy: BattleUnit, hero_target: BattleUnit, action_text: String) -> String:
+	return "%s %s %s" % [_target_rule_label(_enemy_target_rule(enemy)), hero_target.display_name, action_text]
+
+
+func _target_rule_label(target_rule: StringName) -> String:
+	match target_rule:
+		TARGET_RULE_LOWEST_HP:
+			return "Low HP"
+		TARGET_RULE_BACK_ROW_FIRST:
+			return "Back"
+		_:
+			return "Front"
+
+
 func _hero_spawn_position(slot_index: int) -> Vector2:
 	if formation_positions_by_slot.has(slot_index):
 		return formation_positions_by_slot[slot_index]
 	return Vector2(264.0, 220.0)
+
+
+func _apply_stage_data() -> void:
+	var stage_data: StageData = _current_stage_data()
+	battle_state.kill_target = stage_data.kill_target
+
+
+func _current_stage_data() -> StageData:
+	if data_registry != null:
+		var registry_stage_data: StageData = data_registry.get_stage_data(battle_state.current_stage_id) as StageData
+		if registry_stage_data != null:
+			return registry_stage_data
+	return StageDataResource
+
+
+func _current_stage_enemy_pool() -> Array[EnemyData]:
+	var enemy_pool: Array[EnemyData] = []
+	var stage_data: StageData = _current_stage_data()
+	for enemy_id in stage_data.enemy_pool_ids:
+		var enemy_data: EnemyData = _enemy_data_for_id(StringName(enemy_id))
+		if enemy_data != null:
+			enemy_pool.append(enemy_data)
+	if enemy_pool.is_empty():
+		enemy_pool.append(SlimeEnemyDataResource)
+	return enemy_pool
+
+
+func _current_boss_enemy_data() -> EnemyData:
+	var stage_data: StageData = _current_stage_data()
+	var boss_enemy_data: EnemyData = _enemy_data_for_id(stage_data.boss_enemy_id)
+	if boss_enemy_data != null:
+		return boss_enemy_data
+	return BossDataResource
 
 
 func _get_active_formation() -> Array[Dictionary]:
