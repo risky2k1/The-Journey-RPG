@@ -43,6 +43,10 @@ func equip_item_at(index: int) -> void:
 	equipment_changed.emit(_build_total_stat_bonus(), _build_character_summary())
 
 
+func get_total_stat_bonus() -> Dictionary:
+	return _build_total_stat_bonus()
+
+
 func _roll_item(enemy_id: StringName) -> ItemData:
 	if enemy_id == &"enemy_slime_king":
 		return _roll_weighted_item()

@@ -76,6 +76,8 @@ func _slot_count_for_level(level: int) -> int:
 
 
 func _build_summary() -> Dictionary:
+	var slot_2_text: String = "Unlocked - Second hero prototype active" if state.unlocked_team_slot_count >= 2 else "Locked (Lv 2)"
+	var slot_3_text: String = "Unlocked - Reserved for future party expansion" if state.unlocked_team_slot_count >= 3 else "Locked (Lv 4)"
 	return {
 		"profile_level": state.profile_level,
 		"current_exp": state.current_exp,
@@ -88,10 +90,7 @@ func _build_summary() -> Dictionary:
 			state.exp_to_next,
 			state.currency,
 		],
-		"team_progress_text": "Slot 1: Unlocked\nSlot 2: %s\nSlot 3: %s" % [
-			"Unlocked" if state.unlocked_team_slot_count >= 2 else "Locked (Lv 2)",
-			"Unlocked" if state.unlocked_team_slot_count >= 3 else "Locked (Lv 4)",
-		],
+		"team_progress_text": "Slot 1: Adventurer active\nSlot 2: %s\nSlot 3: %s" % [slot_2_text, slot_3_text],
 	}
 
 

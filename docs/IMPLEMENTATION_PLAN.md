@@ -92,9 +92,11 @@ Chứng minh game có thể sống như một cửa sổ desktop nhỏ.
 ### Công việc
 
 - [x] Tạo window cơ bản.
-- [ ] Thử `borderless` nếu phù hợp.
-- [ ] Thử `always-on-top` nếu khả thi.
+- [ ] Thử `borderless` nếu phù hợp. `TBD`: cần runtime verify trong Godot 4.6.
+- [ ] Thử `always-on-top` nếu khả thi. `TBD`: cần runtime verify trong Godot 4.6.
 - [x] Thêm `resize` hoặc `scale` cơ bản.
+- [ ] Thử drag/reposition cho window. `TBD`: đã có first pass, cần runtime verify.
+- [ ] Thử `click-through` cơ bản nếu khả thi. `TBD`: đã có first pass, cần runtime verify trên Linux/X11.
 - [x] Tạo `BattleRoot`.
 - [x] Tạo `BackgroundLayer`.
 - [x] Tạo `UnitLayer`.
