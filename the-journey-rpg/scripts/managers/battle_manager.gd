@@ -48,6 +48,7 @@ var loot_manager: LootManager
 var progression_manager: ProgressionManager
 var team_manager: TeamManager
 var data_registry: DataRegistry
+const HERO_RESPAWN_DELAY := 10.0
 
 
 func _ready() -> void:
@@ -62,7 +63,7 @@ func _ready() -> void:
 	if team_manager != null:
 		team_manager.team_changed.connect(_on_team_changed)
 	_apply_stage_data()
-	_sync_hero_party()
+	_sync_hero_party(true)
 	_spawn_enemy()
 	_emit_event("%s begins" % _current_stage_title())
 	_emit_status()
@@ -165,7 +166,7 @@ func _tick_respawns(delta: float) -> void:
 		hero_respawn_timers[timer_key] = timer_value
 		if is_zero_approx(timer_value):
 			hero_unit.revive()
-			hero_unit.global_position = _hero_spawn_position(hero_unit.formation_slot_index)
+			hero_unit.set_state_text("Revived")
 
 
 func _process_heroes(delta: float) -> void:
@@ -220,8 +221,11 @@ func _process_enemies(delta: float) -> void:
 			enemy.set_state_text(_enemy_target_state_text(enemy, hero_target, "Hit %d" % enemy.attack))
 
 			if not hero_target.is_alive():
-				hero_respawn_timers[str(hero_target.unit_id)] = 2.0
-				hero_target.set_state_text("Respawn 2s")
+				hero_respawn_timers[str(hero_target.unit_id)] = HERO_RESPAWN_DELAY
+				hero_target.set_state_text("Respawn %ds" % int(HERO_RESPAWN_DELAY))
+				if _are_all_heroes_defeated():
+					_handle_party_wipe()
+					return
 
 
 func _move_towards(unit: BattleUnit, target_position: Vector2, delta: float) -> void:
@@ -351,8 +355,9 @@ func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 func _complete_stage() -> void:
 	var completed_stage: StageData = _current_stage_data()
 	var completed_stage_title: String = _stage_title_from_data(completed_stage)
-	if progression_manager != null and completed_stage != null:
-		progression_manager.grant_rewards(completed_stage.clear_reward_exp, completed_stage.clear_reward_coin)
+	var reward_profile: RewardProfileData = _current_reward_profile()
+	if progression_manager != null and reward_profile != null:
+		progression_manager.grant_rewards(reward_profile.clear_reward_exp, reward_profile.clear_reward_coin)
 
 	var next_stage_id: StringName = _next_stage_id(completed_stage)
 	battle_state.current_stage_id = next_stage_id
@@ -361,6 +366,8 @@ func _complete_stage() -> void:
 	battle_state.boss_defeated = false
 	enemy_respawn_queue.clear()
 	_apply_stage_data()
+	_reset_party_positions_and_state()
+	_clear_enemies()
 	_emit_event("%s cleared. %s begins" % [completed_stage_title, _current_stage_title()])
 	_spawn_enemy()
 
@@ -368,13 +375,15 @@ func _complete_stage() -> void:
 func _boss_hp_bonus(is_boss: bool) -> int:
 	if not is_boss:
 		return 0
-	return (current_stage_number - 1) * 20
+	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	return (current_stage_number - 1) * spawn_profile.boss_hp_bonus_per_stage
 
 
 func _boss_attack_bonus(is_boss: bool) -> int:
 	if not is_boss:
 		return 0
-	return current_stage_number - 1
+	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	return (current_stage_number - 1) * spawn_profile.boss_attack_bonus_per_stage
 
 
 func _emit_event(event_text: String) -> void:
@@ -404,14 +413,17 @@ func _apply_equipment_to_heroes(_hero_bonus_by_id: Dictionary, _hero_summary_by_
 
 func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
 	var enemy_data: EnemyData = _enemy_data_for_id(enemy_id)
+	var reward_profile: RewardProfileData = _current_reward_profile()
+	var exp_multiplier: float = reward_profile.enemy_exp_multiplier if reward_profile != null else 1.0
+	var coin_multiplier: float = reward_profile.enemy_coin_multiplier if reward_profile != null else 1.0
 	if enemy_data != null:
 		return {
-			"exp": enemy_data.reward_exp,
-			"coin": enemy_data.reward_coin,
+			"exp": maxi(int(round(enemy_data.reward_exp * exp_multiplier)), 0),
+			"coin": maxi(int(round(enemy_data.reward_coin * coin_multiplier)), 0),
 		}
 	return {
-		"exp": SlimeEnemyDataResource.reward_exp,
-		"coin": SlimeEnemyDataResource.reward_coin,
+		"exp": maxi(int(round(SlimeEnemyDataResource.reward_exp * exp_multiplier)), 0),
+		"coin": maxi(int(round(SlimeEnemyDataResource.reward_coin * coin_multiplier)), 0),
 	}
 
 
@@ -440,7 +452,7 @@ func apply_state(snapshot: Dictionary) -> void:
 
 	_clear_enemies()
 	enemy_respawn_queue.clear()
-	_sync_hero_party()
+	_sync_hero_party(true)
 
 	if battle_state.boss_spawned and not battle_state.boss_defeated:
 		_spawn_boss()
@@ -464,21 +476,29 @@ func _on_team_changed(_summary: Dictionary) -> void:
 	_emit_status()
 
 
-func _sync_hero_party() -> void:
+func _sync_hero_party(reset_positions: bool = false) -> void:
 	var active_formation: Array[Dictionary] = _get_active_formation()
 	var desired_hero_ids: Array[StringName] = []
 	for formation_entry in active_formation:
 		var hero_id: StringName = StringName(formation_entry.get("hero_id", &""))
 		desired_hero_ids.append(hero_id)
+		var slot_index: int = int(formation_entry.get("slot_index", 1))
+		var row_index: int = int(formation_entry.get("row_index", 0))
+		var column_index: int = int(formation_entry.get("column_index", 1))
 		var hero_unit: BattleUnit = hero_units_by_id.get(hero_id) as BattleUnit
+		var should_reset_unit_position: bool = false
 		if hero_unit == null or not is_instance_valid(hero_unit):
 			_spawn_hero_for_entry(formation_entry)
 			hero_unit = hero_units_by_id.get(hero_id) as BattleUnit
+			should_reset_unit_position = true
 		if hero_unit != null and is_instance_valid(hero_unit):
-			hero_unit.formation_slot_index = int(formation_entry.get("slot_index", 1))
-			hero_unit.formation_row_index = int(formation_entry.get("row_index", 0))
-			hero_unit.formation_column_index = int(formation_entry.get("column_index", 1))
-			hero_unit.global_position = _hero_spawn_position(hero_unit.formation_slot_index)
+			if hero_unit.formation_slot_index != slot_index:
+				should_reset_unit_position = true
+			hero_unit.formation_slot_index = slot_index
+			hero_unit.formation_row_index = row_index
+			hero_unit.formation_column_index = column_index
+			if reset_positions or should_reset_unit_position:
+				hero_unit.global_position = _hero_spawn_position(hero_unit.formation_slot_index)
 
 	var units_to_remove: Array[BattleUnit] = []
 	for hero_unit in hero_units:
@@ -505,7 +525,13 @@ func _hero_data_for_id(hero_id: StringName) -> HeroData:
 
 
 func _spawn_normal_enemy_pack() -> void:
-	for enemy_data in _current_stage_enemy_pool():
+	var enemy_pool: Array[EnemyData] = _current_stage_enemy_pool()
+	if enemy_pool.is_empty():
+		return
+
+	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	for pack_index in range(maxi(spawn_profile.pack_size, 1)):
+		var enemy_data: EnemyData = enemy_pool[pack_index % enemy_pool.size()]
 		_spawn_enemy_from_data(enemy_data, false)
 
 
@@ -541,8 +567,9 @@ func _enemy_target_rule(enemy: BattleUnit) -> StringName:
 func _queue_enemy_respawn(enemy_data: EnemyData) -> void:
 	if enemy_data == null or enemy_data.is_boss:
 		return
+	var spawn_profile: SpawnProfileData = _current_spawn_profile()
 	enemy_respawn_queue.append({
-		"timer": 1.1,
+		"timer": maxf(spawn_profile.respawn_delay, 0.1),
 		"enemy_id": enemy_data.id,
 	})
 
@@ -579,6 +606,24 @@ func _current_stage_data() -> StageData:
 		if registry_stage_data != null:
 			return registry_stage_data
 	return StageDataResource
+
+
+func _current_spawn_profile() -> SpawnProfileData:
+	var stage_data: StageData = _current_stage_data()
+	if data_registry != null and stage_data != null and stage_data.spawn_profile_id != &"":
+		var registry_spawn_profile: SpawnProfileData = data_registry.get_spawn_profile_data(stage_data.spawn_profile_id) as SpawnProfileData
+		if registry_spawn_profile != null:
+			return registry_spawn_profile
+	return SpawnProfileData.new()
+
+
+func _current_reward_profile() -> RewardProfileData:
+	var stage_data: StageData = _current_stage_data()
+	if data_registry != null and stage_data != null and stage_data.reward_profile_id != &"":
+		var registry_reward_profile: RewardProfileData = data_registry.get_reward_profile_data(stage_data.reward_profile_id) as RewardProfileData
+		if registry_reward_profile != null:
+			return registry_reward_profile
+	return RewardProfileData.new()
 
 
 func _next_stage_id(current_stage_data: StageData) -> StringName:
@@ -631,3 +676,34 @@ func _get_active_formation() -> Array[Dictionary]:
 			"column_index": 1,
 		},
 	]
+
+
+func _are_all_heroes_defeated() -> bool:
+	var has_hero: bool = false
+	for hero_unit in hero_units:
+		if not is_instance_valid(hero_unit):
+			continue
+		has_hero = true
+		if hero_unit.is_alive():
+			return false
+	return has_hero
+
+
+func _handle_party_wipe() -> void:
+	enemy_respawn_queue.clear()
+	_clear_enemies()
+	_reset_party_positions_and_state()
+	if battle_state.boss_spawned and not battle_state.boss_defeated:
+		_spawn_boss()
+	else:
+		_spawn_enemy()
+	_emit_event("Party wiped. Formation reset")
+
+
+func _reset_party_positions_and_state() -> void:
+	for hero_unit in hero_units:
+		if not is_instance_valid(hero_unit):
+			continue
+		hero_respawn_timers[str(hero_unit.unit_id)] = 0.0
+		hero_unit.revive()
+		hero_unit.global_position = _hero_spawn_position(hero_unit.formation_slot_index)

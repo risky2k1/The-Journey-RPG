@@ -14,5 +14,3 @@ boss_enemy_id = &"enemy_slime_king"
 spawn_profile_id = &"spawn_swarm"
 reward_profile_id = &"reward_green_path_2"
 next_stage_id = &"stage_003"
-clear_reward_exp = 10
-clear_reward_coin = 6

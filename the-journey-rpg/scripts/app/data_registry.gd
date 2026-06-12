@@ -9,6 +9,7 @@ const ITEM_DATA_DIR := "res://resources/items"
 const TEAM_SLOT_DATA_DIR := "res://resources/team_slots"
 const SPAWN_PROFILE_DATA_DIR := "res://resources/spawn_profiles"
 const REWARD_PROFILE_DATA_DIR := "res://resources/reward_profiles"
+const LOOT_TABLE_DATA_DIR := "res://resources/loot_tables"
 
 var heroes: Dictionary[StringName, Resource] = {}
 var enemies: Dictionary[StringName, Resource] = {}
@@ -17,6 +18,7 @@ var items: Dictionary[StringName, Resource] = {}
 var team_slots: Dictionary[StringName, Resource] = {}
 var spawn_profiles: Dictionary[StringName, Resource] = {}
 var reward_profiles: Dictionary[StringName, Resource] = {}
+var loot_tables: Dictionary[StringName, Resource] = {}
 
 
 func _ready() -> void:
@@ -27,6 +29,7 @@ func _ready() -> void:
 	team_slots = _load_resources(TEAM_SLOT_DATA_DIR)
 	spawn_profiles = _load_resources(SPAWN_PROFILE_DATA_DIR)
 	reward_profiles = _load_resources(REWARD_PROFILE_DATA_DIR)
+	loot_tables = _load_resources(LOOT_TABLE_DATA_DIR)
 
 
 func get_hero_data(id: StringName) -> Resource:
@@ -55,6 +58,10 @@ func get_spawn_profile_data(id: StringName) -> Resource:
 
 func get_reward_profile_data(id: StringName) -> Resource:
 	return reward_profiles.get(id)
+
+
+func get_loot_table_data(id: StringName) -> Resource:
+	return loot_tables.get(id)
 
 
 func _load_resources(directory: String) -> Dictionary[StringName, Resource]:

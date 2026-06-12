@@ -14,5 +14,3 @@ boss_enemy_id = &"enemy_thorn_matriarch"
 spawn_profile_id = &"spawn_thorn_crossing"
 reward_profile_id = &"reward_thorn_crossing"
 next_stage_id = &"stage_001"
-clear_reward_exp = 16
-clear_reward_coin = 10

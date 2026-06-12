@@ -28,14 +28,17 @@ var collected_item_ids: Array[StringName] = []
 var recent_item_names: Array[String] = []
 var inventory_items: Array[ItemData] = []
 var equipped_by_hero: Dictionary = {}
+var data_registry: DataRegistry
+
+
+func _ready() -> void:
+	data_registry = get_parent().get_node_or_null("DataRegistry")
 
 
 func roll_loot_for_enemy(enemy_id: StringName, world_position: Vector2) -> void:
-	var item: ItemData = _roll_item(enemy_id)
-	if item == null:
-		return
-
-	loot_dropped.emit(item, world_position)
+	for item in _roll_items(enemy_id):
+		if item != null:
+			loot_dropped.emit(item, world_position)
 
 
 func register_pickup(item_data: ItemData) -> void:
@@ -67,20 +70,59 @@ func get_character_summary(hero_id: StringName) -> String:
 	return _build_character_summary(hero_id)
 
 
-func _roll_item(enemy_id: StringName) -> ItemData:
-	if enemy_id == &"enemy_slime_king":
-		if randf() <= 0.08:
-			return _roll_weighted_item()
+func _roll_items(enemy_id: StringName) -> Array[ItemData]:
+	var loot_table: LootTableData = _loot_table_for_enemy(enemy_id)
+	if loot_table == null:
+		var fallback_item: ItemData = _roll_weighted_item_from_pool(_fallback_item_pool())
+		return [fallback_item] if fallback_item != null else []
+
+	var dropped_items: Array[ItemData] = []
+	for _roll_index in range(maxi(loot_table.rolls, 1)):
+		if randf() > loot_table.drop_chance:
+			continue
+		var item_data: ItemData = _roll_weighted_item_from_entries(loot_table.entries)
+		if item_data != null:
+			dropped_items.append(item_data)
+	return dropped_items
+
+
+func _roll_weighted_item_from_entries(entries: Array[Dictionary]) -> ItemData:
+	var total_weight: int = 0
+	for entry in entries:
+		total_weight += maxi(int(entry.get("weight", 0)), 0)
+
+	if total_weight <= 0:
 		return null
 
-	if randf() <= 0.01:
-		return _roll_weighted_item()
-
+	var roll: int = randi_range(1, total_weight)
+	var cursor: int = 0
+	for entry in entries:
+		cursor += maxi(int(entry.get("weight", 0)), 0)
+		if roll > cursor:
+			continue
+		return _item_from_id(StringName(entry.get("item_id", &"")))
 	return null
 
 
-func _roll_weighted_item() -> ItemData:
-	var item_pool: Array[ItemData] = [
+func _roll_weighted_item_from_pool(item_pool: Array[ItemData]) -> ItemData:
+	var total_weight: int = 0
+	for item_data in item_pool:
+		total_weight += item_data.drop_weight
+
+	if total_weight <= 0:
+		return null
+
+	var roll: int = randi_range(1, total_weight)
+	var cursor: int = 0
+	for item_data in item_pool:
+		cursor += item_data.drop_weight
+		if roll <= cursor:
+			return item_data
+	return item_pool[0] if not item_pool.is_empty() else null
+
+
+func _fallback_item_pool() -> Array[ItemData]:
+	return [
 		RustySwordData,
 		WornBucklerData,
 		PatchedArmorData,
@@ -89,17 +131,6 @@ func _roll_weighted_item() -> ItemData:
 		GreenRingData,
 		CopperCharmData,
 	]
-	var total_weight: int = 0
-	for item_data in item_pool:
-		total_weight += item_data.drop_weight
-
-	var roll: int = randi_range(1, total_weight)
-	var cursor: int = 0
-	for item_data in item_pool:
-		cursor += item_data.drop_weight
-		if roll <= cursor:
-			return item_data
-	return RustySwordData
 
 
 func _build_inventory_text() -> String:
@@ -296,6 +327,10 @@ func apply_state(snapshot: Dictionary) -> void:
 
 
 func _item_from_id(item_id: StringName) -> ItemData:
+	if data_registry != null:
+		var registry_item_data: ItemData = data_registry.get_item_data(item_id) as ItemData
+		if registry_item_data != null:
+			return registry_item_data
 	match item_id:
 		&"item_copper_charm":
 			return CopperCharmData
@@ -313,6 +348,17 @@ func _item_from_id(item_id: StringName) -> ItemData:
 			return WornBucklerData
 		_:
 			return null
+
+
+func _loot_table_for_enemy(enemy_id: StringName) -> LootTableData:
+	if data_registry == null:
+		return null
+
+	var enemy_data: EnemyData = data_registry.get_enemy_data(enemy_id) as EnemyData
+	if enemy_data == null or enemy_data.loot_table_id == &"":
+		return null
+
+	return data_registry.get_loot_table_data(enemy_data.loot_table_id) as LootTableData
 
 
 func _normalize_slot_type(slot_type: StringName) -> StringName:
