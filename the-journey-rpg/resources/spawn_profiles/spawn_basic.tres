@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SpawnProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/spawn_profile_data.gd" id="1_4j4wd"]
+
+[resource]
+script = ExtResource("1_4j4wd")
+id = &"spawn_basic"
+display_name = "Basic Lane Push"
+pack_size = 2
+respawn_delay = 1.1
+boss_hp_bonus_per_stage = 18
+boss_attack_bonus_per_stage = 1

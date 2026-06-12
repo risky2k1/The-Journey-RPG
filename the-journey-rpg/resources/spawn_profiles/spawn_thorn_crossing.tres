@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SpawnProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/spawn_profile_data.gd" id="1_fu5xt"]
+
+[resource]
+script = ExtResource("1_fu5xt")
+id = &"spawn_thorn_crossing"
+display_name = "Thorn Crossing"
+pack_size = 3
+respawn_delay = 0.75
+boss_hp_bonus_per_stage = 26
+boss_attack_bonus_per_stage = 2

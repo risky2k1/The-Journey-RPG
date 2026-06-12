@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/loot_table_data.gd" id="1_25385"]
+
+[resource]
+script = ExtResource("1_25385")
+id = &"thorn_boss"
+display_name = "Thorn Boss Drops"
+drop_chance = 0.18
+rolls = 2
+entries = Array[Dictionary]([{
+"item_id": &"item_copper_charm",
+"weight": 100
+}, {
+"item_id": &"item_green_ring",
+"weight": 95
+}, {
+"item_id": &"item_trail_boots",
+"weight": 75
+}, {
+"item_id": &"item_patched_armor",
+"weight": 65
+}, {
+"item_id": &"item_worn_buckler",
+"weight": 55
+}])

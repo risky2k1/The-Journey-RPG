@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RewardProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/reward_profile_data.gd" id="1_1k6kl"]
+
+[resource]
+script = ExtResource("1_1k6kl")
+id = &"reward_thorn_crossing"
+display_name = "Thorn Crossing"
+clear_reward_exp = 16
+clear_reward_coin = 10
+enemy_exp_multiplier = 1.45
+enemy_coin_multiplier = 1.5

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/loot_table_data.gd" id="1_p7a6x"]
+
+[resource]
+script = ExtResource("1_p7a6x")
+id = &"thorn_basic"
+display_name = "Thorn Basic Drops"
+drop_chance = 0.03
+rolls = 1
+entries = Array[Dictionary]([{
+"item_id": &"item_green_ring",
+"weight": 90
+}, {
+"item_id": &"item_copper_charm",
+"weight": 85
+}, {
+"item_id": &"item_trail_boots",
+"weight": 70
+}, {
+"item_id": &"item_leather_gloves",
+"weight": 65
+}, {
+"item_id": &"item_rusty_sword",
+"weight": 50
+}])

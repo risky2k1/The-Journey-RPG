@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/loot_table_data.gd" id="1_0ufpi"]
+
+[resource]
+script = ExtResource("1_0ufpi")
+id = &"forest_basic"
+display_name = "Forest Basic Drops"
+drop_chance = 0.018
+rolls = 1
+entries = Array[Dictionary]([{
+"item_id": &"item_patched_armor",
+"weight": 95
+}, {
+"item_id": &"item_trail_boots",
+"weight": 90
+}, {
+"item_id": &"item_leather_gloves",
+"weight": 80
+}, {
+"item_id": &"item_worn_buckler",
+"weight": 70
+}, {
+"item_id": &"item_green_ring",
+"weight": 55
+}, {
+"item_id": &"item_copper_charm",
+"weight": 50
+}])

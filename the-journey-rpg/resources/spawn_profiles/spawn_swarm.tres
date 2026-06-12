@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SpawnProfileData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/spawn_profile_data.gd" id="1_y8hf1"]
+
+[resource]
+script = ExtResource("1_y8hf1")
+id = &"spawn_swarm"
+display_name = "Swarm Pressure"
+pack_size = 3
+respawn_delay = 0.9
+boss_hp_bonus_per_stage = 22
+boss_attack_bonus_per_stage = 1

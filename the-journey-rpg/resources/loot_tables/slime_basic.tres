@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/loot_table_data.gd" id="1_77kuj"]
+
+[resource]
+script = ExtResource("1_77kuj")
+id = &"slime_basic"
+display_name = "Slime Basic Drops"
+drop_chance = 0.01
+rolls = 1
+entries = Array[Dictionary]([{
+"item_id": &"item_rusty_sword",
+"weight": 100
+}, {
+"item_id": &"item_worn_buckler",
+"weight": 85
+}, {
+"item_id": &"item_patched_armor",
+"weight": 75
+}, {
+"item_id": &"item_leather_gloves",
+"weight": 70
+}, {
+"item_id": &"item_trail_boots",
+"weight": 65
+}, {
+"item_id": &"item_green_ring",
+"weight": 40
+}, {
+"item_id": &"item_copper_charm",
+"weight": 30
+}])
