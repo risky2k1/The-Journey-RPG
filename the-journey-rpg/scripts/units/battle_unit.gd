@@ -5,8 +5,16 @@ class_name BattleUnit
 const VISUAL_PROFILES := {
 	&"hero_adventurer": {
 		"base_dir": "res://assets/sprites/imported/ranger-variant-3",
-		"scale": Vector2(0.13, 0.13),
-		"offset": Vector2(0.0, -8.0),
+		"scale": Vector2(0.14, 0.14),
+		"offset": Vector2(0.0, -4.0),
+		"overlay": {
+			"name_position": Vector2(-84.0, -118.0),
+			"name_size": Vector2(168.0, 24.0),
+			"hp_position": Vector2(-38.0, -76.0),
+			"hp_size": Vector2(76.0, 8.0),
+			"state_position": Vector2(-80.0, 42.0),
+			"state_size": Vector2(160.0, 24.0),
+		},
 		"animations": {
 			"idle": "Idle",
 			"move": "Running",
@@ -17,8 +25,16 @@ const VISUAL_PROFILES := {
 	},
 	&"hero_apprentice": {
 		"base_dir": "res://assets/sprites/imported/ranger-variant-1",
-		"scale": Vector2(0.13, 0.13),
-		"offset": Vector2(0.0, -8.0),
+		"scale": Vector2(0.14, 0.14),
+		"offset": Vector2(0.0, -2.0),
+		"overlay": {
+			"name_position": Vector2(-84.0, -116.0),
+			"name_size": Vector2(168.0, 24.0),
+			"hp_position": Vector2(-38.0, -74.0),
+			"hp_size": Vector2(76.0, 8.0),
+			"state_position": Vector2(-80.0, 40.0),
+			"state_size": Vector2(160.0, 24.0),
+		},
 		"animations": {
 			"idle": "Idle",
 			"move": "Running",
@@ -29,8 +45,16 @@ const VISUAL_PROFILES := {
 	},
 	&"enemy_slime": {
 		"base_dir": "res://assets/sprites/imported/skeleton",
-		"scale": Vector2(0.12, 0.12),
-		"offset": Vector2(0.0, -10.0),
+		"scale": Vector2(0.14, 0.14),
+		"offset": Vector2(0.0, -2.0),
+		"overlay": {
+			"name_position": Vector2(-84.0, -112.0),
+			"name_size": Vector2(168.0, 24.0),
+			"hp_position": Vector2(-38.0, -72.0),
+			"hp_size": Vector2(76.0, 8.0),
+			"state_position": Vector2(-80.0, 40.0),
+			"state_size": Vector2(160.0, 24.0),
+		},
 		"animations": {
 			"idle": "Idle",
 			"move": "Running",
@@ -41,8 +65,16 @@ const VISUAL_PROFILES := {
 	},
 	&"enemy_slime_king": {
 		"base_dir": "res://assets/sprites/imported/dark-oracle",
-		"scale": Vector2(0.15, 0.15),
-		"offset": Vector2(0.0, -18.0),
+		"scale": Vector2(0.16, 0.16),
+		"offset": Vector2(0.0, -10.0),
+		"overlay": {
+			"name_position": Vector2(-92.0, -128.0),
+			"name_size": Vector2(184.0, 24.0),
+			"hp_position": Vector2(-42.0, -86.0),
+			"hp_size": Vector2(84.0, 8.0),
+			"state_position": Vector2(-88.0, 46.0),
+			"state_size": Vector2(176.0, 24.0),
+		},
 		"animations": {
 			"idle": "Idle",
 			"move": "Running",
@@ -54,6 +86,14 @@ const VISUAL_PROFILES := {
 }
 
 static var sprite_frames_cache: Dictionary = {}
+const DEFAULT_OVERLAY_LAYOUT := {
+	"name_position": Vector2(-64.0, -70.0),
+	"name_size": Vector2(128.0, 28.0),
+	"hp_position": Vector2(-34.0, -30.0),
+	"hp_size": Vector2(68.0, 8.0),
+	"state_position": Vector2(-72.0, 30.0),
+	"state_size": Vector2(144.0, 24.0),
+}
 
 @onready var shadow: Polygon2D = $Shadow
 @onready var aura: Polygon2D = $Aura
@@ -117,6 +157,7 @@ func configure(config: Dictionary) -> void:
 	else:
 		_apply_enemy_visuals()
 	_apply_imported_visual_profile()
+	_apply_overlay_layout()
 
 	name_label.text = display_name
 	_update_hp_bar()
@@ -262,11 +303,10 @@ func _apply_enemy_visuals() -> void:
 
 
 func _update_hp_bar() -> void:
+	var hp_bar_size: Vector2 = hp_bar_background.size
 	var ratio: float = 0.0 if max_hp <= 0 else current_hp / float(max_hp)
-	hp_bar_fill.size.x = 56.0 * ratio
-	hp_bar_fill.position.x = -34.0
-	hp_bar_background.size.x = 68.0
-	hp_bar_background.position.x = -34.0
+	hp_bar_fill.size.x = hp_bar_size.x * ratio
+	hp_bar_fill.position.x = hp_bar_background.position.x
 	shadow.scale.x = 0.82 + (ratio * 0.2)
 
 
@@ -284,6 +324,21 @@ func _apply_imported_visual_profile() -> void:
 	visual_sprite.scale = profile.get("scale", Vector2.ONE)
 	visual_sprite.visible = true
 	_set_placeholder_visuals_visible(false)
+
+
+func _apply_overlay_layout() -> void:
+	var profile: Dictionary = VISUAL_PROFILES.get(unit_id, {})
+	var overlay_layout: Dictionary = profile.get("overlay", DEFAULT_OVERLAY_LAYOUT) if using_imported_visual else DEFAULT_OVERLAY_LAYOUT
+	_set_control_rect(name_label, overlay_layout.get("name_position", DEFAULT_OVERLAY_LAYOUT["name_position"]), overlay_layout.get("name_size", DEFAULT_OVERLAY_LAYOUT["name_size"]))
+	_set_control_rect(hp_bar_background, overlay_layout.get("hp_position", DEFAULT_OVERLAY_LAYOUT["hp_position"]), overlay_layout.get("hp_size", DEFAULT_OVERLAY_LAYOUT["hp_size"]))
+	_set_control_rect(hp_bar_fill, overlay_layout.get("hp_position", DEFAULT_OVERLAY_LAYOUT["hp_position"]), overlay_layout.get("hp_size", DEFAULT_OVERLAY_LAYOUT["hp_size"]))
+	_set_control_rect(state_label, overlay_layout.get("state_position", DEFAULT_OVERLAY_LAYOUT["state_position"]), overlay_layout.get("state_size", DEFAULT_OVERLAY_LAYOUT["state_size"]))
+
+
+func _set_control_rect(control: Control, rect_position: Vector2, rect_size: Vector2) -> void:
+	control.position = rect_position
+	control.custom_minimum_size = Vector2.ZERO
+	control.size = rect_size
 
 
 func _set_placeholder_visuals_visible(is_visible: bool) -> void:

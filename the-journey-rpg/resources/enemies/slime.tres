@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_s13n6")
 id = &"enemy_slime"
-display_name = "Slime"
+display_name = "Skeleton"
 enemy_type = &"normal"
 base_hp = 28
 base_attack = 3

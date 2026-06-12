@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_trkr8")
 id = &"enemy_slime_king"
-display_name = "Slime King"
+display_name = "Dark Oracle"
 enemy_type = &"boss"
 base_hp = 220
 base_attack = 8
