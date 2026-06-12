@@ -178,6 +178,7 @@ func _process_heroes(delta: float) -> void:
 
 		var enemy: BattleUnit = _get_closest_alive_enemy(hero_unit.global_position)
 		if enemy == null:
+			hero_unit.play_idle_animation()
 			hero_unit.set_state_text("Waiting")
 			continue
 
@@ -186,10 +187,12 @@ func _process_heroes(delta: float) -> void:
 
 		if distance > hero_unit.attack_range:
 			_move_towards(hero_unit, enemy.global_position, delta)
+			hero_unit.play_move_animation()
 			hero_unit.set_state_text("Advancing")
 		elif hero_unit.can_attack():
 			enemy.take_damage(hero_unit.attack)
 			hero_unit.reset_attack_cooldown()
+			hero_unit.play_attack_animation()
 			hero_unit.set_state_text("Hit %d" % hero_unit.attack)
 
 			if not enemy.is_alive():
@@ -206,6 +209,7 @@ func _process_enemies(delta: float) -> void:
 			continue
 		var hero_target: BattleUnit = _get_priority_target_hero(enemy)
 		if hero_target == null:
+			enemy.play_idle_animation()
 			enemy.set_state_text("Waiting")
 			continue
 
@@ -214,10 +218,12 @@ func _process_enemies(delta: float) -> void:
 
 		if distance > enemy.attack_range:
 			_move_towards(enemy, hero_target.global_position, delta)
+			enemy.play_move_animation()
 			enemy.set_state_text(_enemy_target_state_text(enemy, hero_target, "Chase"))
 		elif enemy.can_attack():
 			hero_target.take_damage(enemy.attack)
 			enemy.reset_attack_cooldown()
+			enemy.play_attack_animation()
 			enemy.set_state_text(_enemy_target_state_text(enemy, hero_target, "Hit %d" % enemy.attack))
 
 			if not hero_target.is_alive():

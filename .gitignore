@@ -13,3 +13,5 @@ the-journey-rpg/saves/
 # OS noise
 .DS_Store
 Thumbs.db
+
+assets/

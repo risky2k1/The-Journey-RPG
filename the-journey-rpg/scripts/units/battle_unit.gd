@@ -2,8 +2,62 @@ extends Node2D
 
 class_name BattleUnit
 
+const VISUAL_PROFILES := {
+	&"hero_adventurer": {
+		"base_dir": "res://assets/sprites/imported/ranger-variant-3",
+		"scale": Vector2(0.13, 0.13),
+		"offset": Vector2(0.0, -8.0),
+		"animations": {
+			"idle": "Idle",
+			"move": "Running",
+			"attack": "Slashing",
+			"hurt": "Hurt",
+			"down": "Dying",
+		},
+	},
+	&"hero_apprentice": {
+		"base_dir": "res://assets/sprites/imported/ranger-variant-1",
+		"scale": Vector2(0.13, 0.13),
+		"offset": Vector2(0.0, -8.0),
+		"animations": {
+			"idle": "Idle",
+			"move": "Running",
+			"attack": "Shooting",
+			"hurt": "Hurt",
+			"down": "Dying",
+		},
+	},
+	&"enemy_slime": {
+		"base_dir": "res://assets/sprites/imported/skeleton",
+		"scale": Vector2(0.12, 0.12),
+		"offset": Vector2(0.0, -10.0),
+		"animations": {
+			"idle": "Idle",
+			"move": "Running",
+			"attack": "Slashing",
+			"hurt": "Hurt",
+			"down": "Dying",
+		},
+	},
+	&"enemy_slime_king": {
+		"base_dir": "res://assets/sprites/imported/dark-oracle",
+		"scale": Vector2(0.15, 0.15),
+		"offset": Vector2(0.0, -18.0),
+		"animations": {
+			"idle": "Idle",
+			"move": "Running",
+			"attack": "Throwing",
+			"hurt": "Hurt",
+			"down": "Dying",
+		},
+	},
+}
+
+static var sprite_frames_cache: Dictionary = {}
+
 @onready var shadow: Polygon2D = $Shadow
 @onready var aura: Polygon2D = $Aura
+@onready var visual_sprite: AnimatedSprite2D = $VisualSprite
 @onready var back_accent: Polygon2D = $BackAccent
 @onready var body: Polygon2D = $Body
 @onready var chest_accent: Polygon2D = $ChestAccent
@@ -32,6 +86,14 @@ var alive: bool = true
 var formation_slot_index: int = -1
 var formation_row_index: int = 0
 var formation_column_index: int = 1
+var using_imported_visual: bool = false
+var visual_locked: bool = false
+var visual_loop_state: StringName = &"idle"
+
+
+func _ready() -> void:
+	visual_sprite.animation_finished.connect(_on_visual_animation_finished)
+	visual_sprite.visible = false
 
 
 func configure(config: Dictionary) -> void:
@@ -54,10 +116,12 @@ func configure(config: Dictionary) -> void:
 		_apply_hero_visuals()
 	else:
 		_apply_enemy_visuals()
+	_apply_imported_visual_profile()
 
 	name_label.text = display_name
 	_update_hp_bar()
 	set_state_text("Ready")
+	play_idle_animation()
 
 
 func is_alive() -> bool:
@@ -87,6 +151,10 @@ func take_damage(amount: float) -> void:
 		alive = false
 		set_state_text("Down")
 		modulate = Color(0.6, 0.6, 0.6, 0.8)
+		play_down_animation()
+		return
+
+	play_hurt_animation()
 
 
 func revive() -> void:
@@ -96,6 +164,7 @@ func revive() -> void:
 	modulate = Color.WHITE
 	_update_hp_bar()
 	set_state_text("Revived")
+	play_idle_animation()
 
 
 func set_state_text(value: String) -> void:
@@ -114,6 +183,29 @@ func apply_stat_bonus(stat_bonus: Dictionary) -> void:
 	current_hp = max_hp * hp_ratio if alive else current_hp
 	_update_hp_bar()
 	set_state_text("Equipped")
+
+
+func play_idle_animation() -> void:
+	visual_loop_state = &"idle"
+	_play_visual_animation(&"idle")
+
+
+func play_move_animation() -> void:
+	visual_loop_state = &"move"
+	_play_visual_animation(&"move")
+
+
+func play_attack_animation() -> void:
+	_play_visual_animation(&"attack", true)
+
+
+func play_hurt_animation() -> void:
+	_play_visual_animation(&"hurt", true)
+
+
+func play_down_animation() -> void:
+	visual_loop_state = &"down"
+	_play_visual_animation(&"down", true)
 
 
 func _apply_hero_visuals() -> void:
@@ -176,3 +268,97 @@ func _update_hp_bar() -> void:
 	hp_bar_background.size.x = 68.0
 	hp_bar_background.position.x = -34.0
 	shadow.scale.x = 0.82 + (ratio * 0.2)
+
+
+func _apply_imported_visual_profile() -> void:
+	var profile: Dictionary = VISUAL_PROFILES.get(unit_id, {})
+	if profile.is_empty():
+		using_imported_visual = false
+		_set_placeholder_visuals_visible(true)
+		visual_sprite.visible = false
+		return
+
+	using_imported_visual = true
+	visual_sprite.sprite_frames = _sprite_frames_for_profile(unit_id, profile)
+	visual_sprite.position = profile.get("offset", Vector2.ZERO)
+	visual_sprite.scale = profile.get("scale", Vector2.ONE)
+	visual_sprite.visible = true
+	_set_placeholder_visuals_visible(false)
+
+
+func _set_placeholder_visuals_visible(is_visible: bool) -> void:
+	back_accent.visible = is_visible
+	body.visible = is_visible
+	chest_accent.visible = is_visible
+	weapon.visible = is_visible
+
+
+func _play_visual_animation(animation_name: StringName, lock_until_finished: bool = false) -> void:
+	if not using_imported_visual:
+		return
+	if visual_locked and not lock_until_finished:
+		return
+	if visual_sprite.sprite_frames == null:
+		return
+	if not visual_sprite.sprite_frames.has_animation(String(animation_name)):
+		return
+	if visual_sprite.animation == StringName(animation_name) and visual_sprite.is_playing() and not lock_until_finished:
+		return
+
+	visual_locked = lock_until_finished
+	visual_sprite.play(StringName(animation_name))
+
+
+func _on_visual_animation_finished() -> void:
+	if not using_imported_visual:
+		return
+	if visual_sprite.animation == &"down":
+		visual_sprite.stop()
+		return
+	visual_locked = false
+	if visual_loop_state == &"move":
+		_play_visual_animation(&"move")
+	else:
+		_play_visual_animation(&"idle")
+
+
+func _sprite_frames_for_profile(profile_id: StringName, profile: Dictionary) -> SpriteFrames:
+	if sprite_frames_cache.has(profile_id):
+		return sprite_frames_cache[profile_id]
+
+	var sprite_frames := SpriteFrames.new()
+	var animation_map: Dictionary = profile.get("animations", {})
+	for animation_name in animation_map.keys():
+		var folder_name: String = str(animation_map[animation_name])
+		var folder_path: String = "%s/%s" % [str(profile.get("base_dir", "")), folder_name]
+		var frame_paths: PackedStringArray = _png_paths_in_dir(folder_path)
+		if frame_paths.is_empty():
+			continue
+
+		sprite_frames.add_animation(String(animation_name))
+		sprite_frames.set_animation_loop(String(animation_name), animation_name in [&"idle", &"move"])
+		sprite_frames.set_animation_speed(String(animation_name), 12.0)
+		for frame_path in frame_paths:
+			var texture: Texture2D = load(frame_path) as Texture2D
+			if texture != null:
+				sprite_frames.add_frame(String(animation_name), texture)
+
+	sprite_frames_cache[profile_id] = sprite_frames
+	return sprite_frames
+
+
+func _png_paths_in_dir(dir_path: String) -> PackedStringArray:
+	var paths: PackedStringArray = []
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return paths
+
+	dir.list_dir_begin()
+	var file_name: String = dir.get_next()
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.to_lower().ends_with(".png"):
+			paths.append(dir_path.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	paths.sort()
+	return paths
