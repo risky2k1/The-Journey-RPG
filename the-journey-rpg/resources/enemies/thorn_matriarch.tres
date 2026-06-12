@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_data.gd" id="1_26vg7"]
+
+[resource]
+script = ExtResource("1_26vg7")
+id = &"enemy_thorn_matriarch"
+display_name = "Thorn Matriarch"
+enemy_type = &"boss"
+base_hp = 300
+base_attack = 11
+base_attack_speed = 1.0
+base_move_speed = 60.0
+attack_range = 40.0
+reward_exp = 30
+reward_coin = 18
+loot_table_id = &"thorn_boss"
+sprite_id = &"enemy_thorn_matriarch_sprite"
+is_boss = true
+target_rule = &"lowest_hp"

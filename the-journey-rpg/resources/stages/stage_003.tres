@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_spak2"]
+
+[resource]
+script = ExtResource("1_spak2")
+id = &"stage_003"
+stage_number = 3
+display_name = "Thorn Crossing"
+background_id = &"thorn_crossing"
+enemy_pool_ids = Array[StringName]([&"enemy_needle_bat", &"enemy_briar_boar", &"enemy_thorn_stinger"])
+kill_target = 34
+boss_enemy_id = &"enemy_thorn_matriarch"
+spawn_profile_id = &"spawn_thorn_crossing"
+reward_profile_id = &"reward_thorn_crossing"
+next_stage_id = &"stage_001"
+clear_reward_exp = 16
+clear_reward_coin = 10

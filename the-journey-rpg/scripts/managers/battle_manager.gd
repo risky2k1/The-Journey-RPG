@@ -64,7 +64,7 @@ func _ready() -> void:
 	_apply_stage_data()
 	_sync_hero_party()
 	_spawn_enemy()
-	_emit_event("Stage %d begins" % current_stage_number)
+	_emit_event("%s begins" % _current_stage_title())
 	_emit_status()
 	battle_bootstrapped.emit()
 
@@ -321,7 +321,7 @@ func _emit_status() -> void:
 			alive_enemy_count += 1
 
 	var boss_text: String = "Boss active" if battle_state.boss_spawned else "Boss soon"
-	var status_text: String = "Stage %d  |  Kills %d/%d  |  %s  |  Party %d/%d  |  HP %s  |  Foes %d" % [current_stage_number, battle_state.kill_count, battle_state.kill_target, boss_text, alive_hero_count, hero_units.size(), hero_hp_text, alive_enemy_count]
+	var status_text: String = "%s  |  Kills %d/%d  |  %s  |  Party %d/%d  |  HP %s  |  Foes %d" % [_current_stage_title(), battle_state.kill_count, battle_state.kill_target, boss_text, alive_hero_count, hero_units.size(), hero_hp_text, alive_enemy_count]
 	battle_status_changed.emit(status_text)
 
 
@@ -349,12 +349,19 @@ func _handle_enemy_defeated(enemy: BattleUnit) -> void:
 
 
 func _complete_stage() -> void:
-	current_stage_number += 1
+	var completed_stage: StageData = _current_stage_data()
+	var completed_stage_title: String = _stage_title_from_data(completed_stage)
+	if progression_manager != null and completed_stage != null:
+		progression_manager.grant_rewards(completed_stage.clear_reward_exp, completed_stage.clear_reward_coin)
+
+	var next_stage_id: StringName = _next_stage_id(completed_stage)
+	battle_state.current_stage_id = next_stage_id
 	battle_state.kill_count = 0
-	battle_state.kill_target += 4
 	battle_state.boss_spawned = false
 	battle_state.boss_defeated = false
-	_emit_event("Stage %d unlocked" % current_stage_number)
+	enemy_respawn_queue.clear()
+	_apply_stage_data()
+	_emit_event("%s cleared. %s begins" % [completed_stage_title, _current_stage_title()])
 	_spawn_enemy()
 
 
@@ -562,6 +569,7 @@ func _hero_spawn_position(slot_index: int) -> Vector2:
 
 func _apply_stage_data() -> void:
 	var stage_data: StageData = _current_stage_data()
+	current_stage_number = maxi(stage_data.stage_number, 1)
 	battle_state.kill_target = stage_data.kill_target
 
 
@@ -571,6 +579,24 @@ func _current_stage_data() -> StageData:
 		if registry_stage_data != null:
 			return registry_stage_data
 	return StageDataResource
+
+
+func _next_stage_id(current_stage_data: StageData) -> StringName:
+	if current_stage_data != null and current_stage_data.next_stage_id != &"":
+		return current_stage_data.next_stage_id
+	return StageDataResource.id
+
+
+func _current_stage_title() -> String:
+	return _stage_title_from_data(_current_stage_data())
+
+
+func _stage_title_from_data(stage_data: StageData) -> String:
+	if stage_data == null:
+		return "Stage %d" % current_stage_number
+	if stage_data.display_name.is_empty():
+		return "Stage %d" % maxi(stage_data.stage_number, 1)
+	return "Stage %d %s" % [maxi(stage_data.stage_number, 1), stage_data.display_name]
 
 
 func _current_stage_enemy_pool() -> Array[EnemyData]:

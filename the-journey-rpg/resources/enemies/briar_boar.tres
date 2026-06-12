@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_data.gd" id="1_x4k4h"]
+
+[resource]
+script = ExtResource("1_x4k4h")
+id = &"enemy_briar_boar"
+display_name = "Briar Boar"
+enemy_type = &"normal"
+base_hp = 42
+base_attack = 5
+base_attack_speed = 0.95
+base_move_speed = 74.0
+attack_range = 26.0
+reward_exp = 4
+reward_coin = 3
+loot_table_id = &"forest_basic"
+sprite_id = &"enemy_briar_boar_sprite"
+is_boss = false
+target_rule = &"front_first"

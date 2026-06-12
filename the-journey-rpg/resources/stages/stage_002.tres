@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/stage_data.gd" id="1_bsu1y"]
+
+[resource]
+script = ExtResource("1_bsu1y")
+id = &"stage_002"
+stage_number = 2
+display_name = "Green Path 2"
+background_id = &"green_path"
+enemy_pool_ids = Array[StringName]([&"enemy_slime", &"enemy_needle_bat", &"enemy_briar_boar"])
+kill_target = 28
+boss_enemy_id = &"enemy_slime_king"
+spawn_profile_id = &"spawn_swarm"
+reward_profile_id = &"reward_green_path_2"
+next_stage_id = &"stage_003"
+clear_reward_exp = 10
+clear_reward_coin = 6
