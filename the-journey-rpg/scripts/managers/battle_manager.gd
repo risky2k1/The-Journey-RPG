@@ -7,13 +7,10 @@ const BattleStateScript := preload("res://scripts/state/battle_state.gd")
 const LootDropScene := preload("res://scenes/battle/loot_drop.tscn")
 const HeroDataResource := preload("res://resources/heroes/adventurer.tres")
 const SecondHeroDataResource := preload("res://resources/heroes/apprentice.tres")
-const StageDataResource := preload("res://resources/stages/stage_001.tres")
-const SlimeEnemyDataResource := preload("res://resources/enemies/slime.tres")
-const NeedleBatEnemyDataResource := preload("res://resources/enemies/needle_bat.tres")
-const BossDataResource := preload("res://resources/enemies/slime_king.tres")
 const TARGET_RULE_FRONT_FIRST := &"front_first"
 const TARGET_RULE_LOWEST_HP := &"lowest_hp"
 const TARGET_RULE_BACK_ROW_FIRST := &"back_row_first"
+const DEFAULT_STAGE_ID := &"stage_001"
 
 signal battle_bootstrapped
 signal battle_status_changed(status_text: String)
@@ -62,6 +59,9 @@ func _ready() -> void:
 		loot_manager.equipment_changed.connect(_apply_equipment_to_heroes)
 	if team_manager != null:
 		team_manager.team_changed.connect(_on_team_changed)
+	if not _validate_battle_data():
+		set_physics_process(false)
+		return
 	_apply_stage_data()
 	_sync_hero_party(true)
 	_spawn_enemy()
@@ -113,12 +113,17 @@ func _spawn_enemy() -> void:
 
 func _spawn_boss() -> void:
 	var boss_data: EnemyData = _current_boss_enemy_data()
+	if boss_data == null:
+		_report_battle_data_error("Missing boss data for stage %s" % battle_state.current_stage_id)
+		return
 	_spawn_enemy_from_data(boss_data, true)
 	battle_state.boss_spawned = true
 	_emit_event("Boss appeared: %s" % boss_data.display_name)
 
 
 func _spawn_enemy_from_data(data: EnemyData, is_boss: bool) -> void:
+	if data == null:
+		return
 	var enemy: BattleUnit = BattleUnitScene.instantiate()
 	unit_layer.add_child(enemy)
 	enemy.configure({
@@ -382,6 +387,8 @@ func _boss_hp_bonus(is_boss: bool) -> int:
 	if not is_boss:
 		return 0
 	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	if spawn_profile == null:
+		return 0
 	return (current_stage_number - 1) * spawn_profile.boss_hp_bonus_per_stage
 
 
@@ -389,6 +396,8 @@ func _boss_attack_bonus(is_boss: bool) -> int:
 	if not is_boss:
 		return 0
 	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	if spawn_profile == null:
+		return 0
 	return (current_stage_number - 1) * spawn_profile.boss_attack_bonus_per_stage
 
 
@@ -428,8 +437,8 @@ func _reward_for_enemy(enemy_id: StringName) -> Dictionary:
 			"coin": maxi(int(round(enemy_data.reward_coin * coin_multiplier)), 0),
 		}
 	return {
-		"exp": maxi(int(round(SlimeEnemyDataResource.reward_exp * exp_multiplier)), 0),
-		"coin": maxi(int(round(SlimeEnemyDataResource.reward_coin * coin_multiplier)), 0),
+		"exp": 0,
+		"coin": 0,
 	}
 
 
@@ -533,28 +542,22 @@ func _hero_data_for_id(hero_id: StringName) -> HeroData:
 func _spawn_normal_enemy_pack() -> void:
 	var enemy_pool: Array[EnemyData] = _current_stage_enemy_pool()
 	if enemy_pool.is_empty():
+		_report_battle_data_error("Stage %s has no enemy pool entries" % battle_state.current_stage_id)
 		return
 
 	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	if spawn_profile == null:
+		_report_battle_data_error("Stage %s is missing spawn profile data" % battle_state.current_stage_id)
+		return
 	for pack_index in range(maxi(spawn_profile.pack_size, 1)):
 		var enemy_data: EnemyData = enemy_pool[pack_index % enemy_pool.size()]
 		_spawn_enemy_from_data(enemy_data, false)
 
 
 func _enemy_data_for_id(enemy_id: StringName) -> EnemyData:
-	if data_registry != null:
-		var registry_enemy_data: EnemyData = data_registry.get_enemy_data(enemy_id) as EnemyData
-		if registry_enemy_data != null:
-			return registry_enemy_data
-	match enemy_id:
-		SlimeEnemyDataResource.id:
-			return SlimeEnemyDataResource
-		NeedleBatEnemyDataResource.id:
-			return NeedleBatEnemyDataResource
-		BossDataResource.id:
-			return BossDataResource
-		_:
-			return SlimeEnemyDataResource
+	if data_registry == null:
+		return null
+	return data_registry.get_enemy_data(enemy_id) as EnemyData
 
 
 func _enemy_data_for_unit(enemy: BattleUnit) -> EnemyData:
@@ -574,6 +577,9 @@ func _queue_enemy_respawn(enemy_data: EnemyData) -> void:
 	if enemy_data == null or enemy_data.is_boss:
 		return
 	var spawn_profile: SpawnProfileData = _current_spawn_profile()
+	if spawn_profile == null:
+		_report_battle_data_error("Stage %s is missing spawn profile data" % battle_state.current_stage_id)
+		return
 	enemy_respawn_queue.append({
 		"timer": maxf(spawn_profile.respawn_delay, 0.1),
 		"enemy_id": enemy_data.id,
@@ -602,40 +608,36 @@ func _hero_spawn_position(slot_index: int) -> Vector2:
 
 func _apply_stage_data() -> void:
 	var stage_data: StageData = _current_stage_data()
+	if stage_data == null:
+		return
 	current_stage_number = maxi(stage_data.stage_number, 1)
 	battle_state.kill_target = stage_data.kill_target
 
 
 func _current_stage_data() -> StageData:
-	if data_registry != null:
-		var registry_stage_data: StageData = data_registry.get_stage_data(battle_state.current_stage_id) as StageData
-		if registry_stage_data != null:
-			return registry_stage_data
-	return StageDataResource
+	if data_registry == null:
+		return null
+	return data_registry.get_stage_data(battle_state.current_stage_id) as StageData
 
 
 func _current_spawn_profile() -> SpawnProfileData:
 	var stage_data: StageData = _current_stage_data()
 	if data_registry != null and stage_data != null and stage_data.spawn_profile_id != &"":
-		var registry_spawn_profile: SpawnProfileData = data_registry.get_spawn_profile_data(stage_data.spawn_profile_id) as SpawnProfileData
-		if registry_spawn_profile != null:
-			return registry_spawn_profile
-	return SpawnProfileData.new()
+		return data_registry.get_spawn_profile_data(stage_data.spawn_profile_id) as SpawnProfileData
+	return null
 
 
 func _current_reward_profile() -> RewardProfileData:
 	var stage_data: StageData = _current_stage_data()
 	if data_registry != null and stage_data != null and stage_data.reward_profile_id != &"":
-		var registry_reward_profile: RewardProfileData = data_registry.get_reward_profile_data(stage_data.reward_profile_id) as RewardProfileData
-		if registry_reward_profile != null:
-			return registry_reward_profile
-	return RewardProfileData.new()
+		return data_registry.get_reward_profile_data(stage_data.reward_profile_id) as RewardProfileData
+	return null
 
 
 func _next_stage_id(current_stage_data: StageData) -> StringName:
 	if current_stage_data != null and current_stage_data.next_stage_id != &"":
 		return current_stage_data.next_stage_id
-	return StageDataResource.id
+	return battle_state.current_stage_id if battle_state != null else DEFAULT_STAGE_ID
 
 
 func _current_stage_title() -> String:
@@ -653,21 +655,51 @@ func _stage_title_from_data(stage_data: StageData) -> String:
 func _current_stage_enemy_pool() -> Array[EnemyData]:
 	var enemy_pool: Array[EnemyData] = []
 	var stage_data: StageData = _current_stage_data()
+	if stage_data == null:
+		return enemy_pool
 	for enemy_id in stage_data.enemy_pool_ids:
 		var enemy_data: EnemyData = _enemy_data_for_id(StringName(enemy_id))
 		if enemy_data != null:
 			enemy_pool.append(enemy_data)
-	if enemy_pool.is_empty():
-		enemy_pool.append(SlimeEnemyDataResource)
 	return enemy_pool
 
 
 func _current_boss_enemy_data() -> EnemyData:
 	var stage_data: StageData = _current_stage_data()
+	if stage_data == null:
+		return null
 	var boss_enemy_data: EnemyData = _enemy_data_for_id(stage_data.boss_enemy_id)
-	if boss_enemy_data != null:
-		return boss_enemy_data
-	return BossDataResource
+	return boss_enemy_data
+
+
+func _validate_battle_data() -> bool:
+	if data_registry == null:
+		_report_battle_data_error("BattleManager requires AppRoot/DataRegistry")
+		return false
+
+	var stage_data: StageData = _current_stage_data()
+	if stage_data == null:
+		_report_battle_data_error("Missing stage data for %s" % battle_state.current_stage_id)
+		return false
+	if _current_stage_enemy_pool().is_empty():
+		_report_battle_data_error("Stage %s has no valid enemy data in DataRegistry" % battle_state.current_stage_id)
+		return false
+	if _current_boss_enemy_data() == null:
+		_report_battle_data_error("Stage %s boss enemy is missing from DataRegistry" % battle_state.current_stage_id)
+		return false
+	if _current_spawn_profile() == null:
+		_report_battle_data_error("Stage %s spawn profile is missing from DataRegistry" % battle_state.current_stage_id)
+		return false
+	if _current_reward_profile() == null:
+		_report_battle_data_error("Stage %s reward profile is missing from DataRegistry" % battle_state.current_stage_id)
+		return false
+
+	return true
+
+
+func _report_battle_data_error(message: String) -> void:
+	push_error(message)
+	_emit_event(message)
 
 
 func _get_active_formation() -> Array[Dictionary]:

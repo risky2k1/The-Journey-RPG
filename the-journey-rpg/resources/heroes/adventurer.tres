@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="HeroData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="HeroData" format=3 uid="uid://dv5uia4s6lx2s"]
 
-[ext_resource type="Script" path="res://scripts/data/hero_data.gd" id="1_8ko0g"]
+[ext_resource type="Script" uid="uid://bwjomm66s4ct6" path="res://scripts/data/hero_data.gd" id="1_8ko0g"]
 
 [resource]
 script = ExtResource("1_8ko0g")
@@ -9,9 +9,7 @@ display_name = "Adventurer"
 class_id = &"adventurer"
 base_hp = 120
 base_attack = 12
-base_attack_speed = 1.0
 base_move_speed = 84.0
 attack_range = 32.0
-starting_skill_ids = Array[StringName]([])
 sprite_id = &"hero_adventurer_sprite"
 portrait_id = &"hero_adventurer_portrait"

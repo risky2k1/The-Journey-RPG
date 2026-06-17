@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cg7m263xpi8wb"]
+[gd_scene format=3 uid="uid://cg7m263xpi8wb"]
 
 [ext_resource type="Script" uid="uid://dda4ljxsmqxa3" path="res://scripts/app/data_registry.gd" id="1_12jwv"]
 [ext_resource type="Script" uid="uid://cote0sup6y5x4" path="res://scripts/app/game_controller.gd" id="2_qpkh0"]
@@ -6,8 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://d0vj32n2x0gyp" path="res://scenes/main/window_root.tscn" id="4_kw64v"]
 [ext_resource type="Script" uid="uid://cmyc1wv7bux55" path="res://scripts/managers/loot_manager.gd" id="5_h1teo"]
 [ext_resource type="Script" uid="uid://2x4ql72atbs6" path="res://scripts/managers/progression_manager.gd" id="6_0j8ay"]
-[ext_resource type="Script" path="res://scripts/app/window_behavior_manager.gd" id="7_x8ga2"]
-[ext_resource type="Script" path="res://scripts/managers/team_manager.gd" id="8_a7v0h"]
+[ext_resource type="Script" uid="uid://jtcma6prm33t" path="res://scripts/app/window_behavior_manager.gd" id="7_x8ga2"]
+[ext_resource type="Script" uid="uid://d4mf363km5shk" path="res://scripts/managers/team_manager.gd" id="8_a7v0h"]
 
 [node name="Main" type="Node" unique_id=1966790259]
 
@@ -28,12 +28,13 @@ script = ExtResource("5_h1teo")
 [node name="ProgressionManager" type="Node" parent="AppRoot" unique_id=317194476]
 script = ExtResource("6_0j8ay")
 
-[node name="TeamManager" type="Node" parent="AppRoot"]
+[node name="TeamManager" type="Node" parent="AppRoot" unique_id=1522520009]
 script = ExtResource("8_a7v0h")
 
-[node name="WindowBehaviorManager" type="Node" parent="AppRoot"]
+[node name="WindowBehaviorManager" type="Node" parent="AppRoot" unique_id=207888507]
 script = ExtResource("7_x8ga2")
 
 [node name="WindowRoot" parent="." unique_id=142296568 instance=ExtResource("4_kw64v")]
+anchors_preset = -1
 offset_left = -21.0
-offset_right = -21.0
+offset_bottom = 716.0
